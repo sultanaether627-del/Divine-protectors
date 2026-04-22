@@ -1,7 +1,6 @@
-[gd_scene load_steps=7 format=3 uid="uid://cx3ecdvpdi5i1"]
+[gd_scene load_steps=6 format=3 uid="uid://cx3ecdvpdi5i1"]
 
 [ext_resource type="Texture2D" uid="uid://bc4qmielx88" path="res://images.jpg" id="1_vfvua"]
-[ext_resource type="Script" path="res://character_body_2d.gd" id="3_drmyr"]
 [ext_resource type="Script" path="res://tile_map_layer.gd" id="3_jmsda"]
 [ext_resource type="PackedScene" uid="uid://bb2pgvopj6mrq" path="res://player.tscn" id="4_00741"]
 
@@ -2128,7 +2127,6 @@ sources/0 = SubResource("TileSetAtlasSource_7k0k5")
 
 [node name="Tilemaplayer" type="Node2D"]
 position = Vector2(-29, -6)
-script = ExtResource("3_drmyr")
 
 [node name="TileMapLayer" type="TileMapLayer" parent="."]
 tile_map_data = PackedByteArray(0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
@@ -2137,3 +2135,4 @@ collision_visibility_mode = 1
 script = ExtResource("3_jmsda")
 
 [node name="PLAYER" parent="." instance=ExtResource("4_00741")]
+motion_mode = 1
