@@ -1,0 +1,14 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="PackedScene" path="res://tscn/health_bar.tscn" id="1_health"]
+[ext_resource type="PackedScene" path="res://tscn/xp_bar.tscn" id="2_xp"]
+[ext_resource type="PackedScene" path="res://tscn/upgrade_panel.tscn" id="3_upgrade"]
+
+[node name="GameUI" type="CanvasLayer"]
+layer = 10
+
+[node name="HealthBar" parent="." instance=ExtResource("1_health")]
+
+[node name="XPBar" parent="." instance=ExtResource("2_xp")]
+
+[node name="UpgradePanel" parent="." instance=ExtResource("3_upgrade")]

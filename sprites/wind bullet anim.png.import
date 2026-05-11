@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://wlughcprff7c"
-path="res://.godot/imported/Untitled124_20260408093656.png-04c535a9211c3a46ce2cc1087ca9babc.ctex"
+uid="uid://fork0e2dg6e"
+path="res://.godot/imported/wind bullet anim.png-4e46bdda41ef7de438f0b819b5e5931d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Untitled124_20260408093656.png"
-dest_files=["res://.godot/imported/Untitled124_20260408093656.png-04c535a9211c3a46ce2cc1087ca9babc.ctex"]
+source_file="res://sprites/wind bullet anim.png"
+dest_files=["res://.godot/imported/wind bullet anim.png-4e46bdda41ef7de438f0b819b5e5931d.ctex"]
 
 [params]
 

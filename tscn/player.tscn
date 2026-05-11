@@ -1,0 +1,24 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/player_controller.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://tscn/forms/water_form.tscn" id="2_water"]
+[ext_resource type="PackedScene" path="res://tscn/forms/fire_form.tscn" id="3_fire"]
+[ext_resource type="PackedScene" path="res://tscn/forms/earth_form.tscn" id="4_earth"]
+[ext_resource type="PackedScene" path="res://tscn/forms/wind_form.tscn" id="5_wind"]
+
+[sub_resource type="CapsuleShape2D" id="shape"]
+radius = 34.0
+height = 104.0
+
+[node name="PlayerController" type="CharacterBody2D"]
+script = ExtResource("1_script")
+water_form_scene = ExtResource("2_water")
+fire_form_scene = ExtResource("3_fire")
+earth_form_scene = ExtResource("4_earth")
+wind_form_scene = ExtResource("5_wind")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 10)
+shape = SubResource("shape")
+
+[node name="FormsRoot" type="Node2D" parent="."]

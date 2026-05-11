@@ -1,0 +1,31 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/bullet.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://sprites/water bullets anim.png" id="2_tex"]
+
+[sub_resource type="CircleShape2D" id="shape"]
+radius = 8.0
+
+[sub_resource type="AtlasTexture" id="a0"]
+atlas = ExtResource("2_tex")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="a1"]
+atlas = ExtResource("2_tex")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="SpriteFrames" id="frames"]
+animations = [{"frames": [{"duration": 1.0, "texture": SubResource("a0")}, {"duration": 1.0, "texture": SubResource("a1")}], "loop": true, "name": &"fly", "speed": 12.0}]
+
+[node name="FireBullet" type="Area2D"]
+script = ExtResource("1_script")
+bullet_element = "fire"
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+texture_filter = 1
+sprite_frames = SubResource("frames")
+animation = &"fly"
+autoplay = "fly"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("shape")

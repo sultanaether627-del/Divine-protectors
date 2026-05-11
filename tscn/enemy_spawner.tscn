@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://enemyspawner123"]
+
+[ext_resource type="Script" path="res://scripts/enemy_spawner.gd" id="1_spawner"]
+
+[node name="EnemySpawner" type="Node2D"]
+script = ExtResource("1_spawner")
+spawn_time = 1.2
+spawn_distance = 360.0
+max_enemies = 30
+spawn_immediately = true
