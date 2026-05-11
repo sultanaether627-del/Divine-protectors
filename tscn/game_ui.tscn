@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=4 format=3 uid="uid://2nmijnie5jmv"]
 
 [ext_resource type="PackedScene" path="res://tscn/health_bar.tscn" id="1_health"]
 [ext_resource type="PackedScene" path="res://tscn/xp_bar.tscn" id="2_xp"]
@@ -8,7 +8,9 @@
 layer = 10
 
 [node name="HealthBar" parent="." instance=ExtResource("1_health")]
+anchors_preset = -1
 
 [node name="XPBar" parent="." instance=ExtResource("2_xp")]
+anchors_preset = -1
 
 [node name="UpgradePanel" parent="." instance=ExtResource("3_upgrade")]
