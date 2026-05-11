@@ -1,0 +1,47 @@
+[gd_scene load_steps=6 format=3 uid="uid://de2mbtsavtd76"]
+
+[ext_resource type="Script" path="res://Ui button testing final res/return_button.gd" id="1_0534v"]
+[ext_resource type="Texture2D" uid="uid://dy80wwhbpp6wp" path="res://UI-20260510T082413Z-3-001/UI/heart2.png" id="2_pf1og"]
+[ext_resource type="Texture2D" uid="uid://3vhykrmmkumi" path="res://UI-20260510T082413Z-3-001/UI/attack speed2.png" id="3_6fy1y"]
+[ext_resource type="Texture2D" uid="uid://co1qdpka48osw" path="res://UI-20260510T082413Z-3-001/UI/atk2.png" id="4_cqyra"]
+
+[sub_resource type="SystemFont" id="SystemFont_jmyt2"]
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="return button" type="Button" parent="."]
+layout_mode = 0
+offset_right = 266.0
+offset_bottom = 77.0
+theme_override_fonts/font = SubResource("SystemFont_jmyt2")
+theme_override_font_sizes/font_size = 50
+text = "return me!"
+script = ExtResource("1_0534v")
+
+[node name="Heart2" type="Sprite2D" parent="."]
+position = Vector2(900, 43)
+texture = ExtResource("2_pf1og")
+
+[node name="Heart3" type="Sprite2D" parent="."]
+position = Vector2(971, 42)
+texture = ExtResource("2_pf1og")
+
+[node name="Heart4" type="Sprite2D" parent="."]
+position = Vector2(1046, 44)
+texture = ExtResource("2_pf1og")
+
+[node name="AttackSpeed2" type="Sprite2D" parent="."]
+position = Vector2(52, 599)
+texture = ExtResource("3_6fy1y")
+
+[node name="Atk2" type="Sprite2D" parent="."]
+position = Vector2(129, 600)
+texture = ExtResource("4_cqyra")
+
+[connection signal="pressed" from="return button" to="return button" method="_on_pressed"]

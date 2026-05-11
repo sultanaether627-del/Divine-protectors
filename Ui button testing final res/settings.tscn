@@ -1,0 +1,21 @@
+[gd_scene load_steps=2 format=3 uid="uid://bbr6fpl0hr0jv"]
+
+[ext_resource type="Script" path="res://button.gd" id="2_0wlel"]
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="setting buttons" type="Button" parent="."]
+layout_mode = 0
+offset_right = 327.0
+offset_bottom = 149.0
+theme_override_font_sizes/font_size = 50
+text = "return me!"
+script = ExtResource("2_0wlel")
+
+[connection signal="pressed" from="setting buttons" to="setting buttons" method="_on_pressed"]

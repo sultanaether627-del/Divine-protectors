@@ -1,0 +1,56 @@
+[gd_scene load_steps=8 format=3 uid="uid://dkew1gs84bw8u"]
+
+[ext_resource type="Texture2D" uid="uid://vcc3rxx6qnyw" path="res://UI-20260510T082413Z-3-001/UI/play.png" id="1_ib1pf"]
+[ext_resource type="Texture2D" uid="uid://b4rqf366ica3a" path="res://pixel_art__dungeon_entrance_door_by_kristyglas_ddto0gw-pre.jpg" id="1_oankt"]
+[ext_resource type="Script" path="res://Ui button testing final res/playbutton.gd" id="2_j0ka7"]
+[ext_resource type="Texture2D" uid="uid://b4sp8se3q7kgk" path="res://UI-20260510T082413Z-3-001/UI/Shop.png" id="3_c88s7"]
+[ext_resource type="Script" path="res://Ui button testing final res/shop.gd" id="4_v5jay"]
+[ext_resource type="Texture2D" uid="uid://c3vx0upklexd2" path="res://UI-20260510T082413Z-3-001/UI/setting.png" id="5_p6tyi"]
+[ext_resource type="Script" path="res://Ui button testing final res/settings.gd" id="7_rx4aj"]
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(577.5, 338.75)
+scale = Vector2(1.04622, 1.07377)
+texture = ExtResource("1_oankt")
+
+[node name="play button" type="Button" parent="."]
+layout_mode = 0
+offset_left = 26.0
+offset_top = 171.0
+offset_right = 358.0
+offset_bottom = 275.0
+icon = ExtResource("1_ib1pf")
+flat = true
+script = ExtResource("2_j0ka7")
+
+[node name="shop" type="Button" parent="."]
+layout_mode = 0
+offset_left = 28.0
+offset_top = 286.0
+offset_right = 360.0
+offset_bottom = 390.0
+icon = ExtResource("3_c88s7")
+flat = true
+script = ExtResource("4_v5jay")
+
+[node name="settings" type="Button" parent="."]
+layout_mode = 0
+offset_left = 28.0
+offset_top = 404.0
+offset_right = 360.0
+offset_bottom = 508.0
+icon = ExtResource("5_p6tyi")
+flat = true
+script = ExtResource("7_rx4aj")
+
+[connection signal="pressed" from="play button" to="play button" method="_on_pressed"]
+[connection signal="pressed" from="shop" to="shop" method="_on_pressed"]
+[connection signal="pressed" from="settings" to="settings" method="_on_pressed"]

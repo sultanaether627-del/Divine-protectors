@@ -1,0 +1,41 @@
+[gd_scene load_steps=3 format=3 uid="uid://0sg0q15prec7"]
+
+[ext_resource type="Script" path="res://Ui button testing final res/returnbutton2.gd" id="2_6rdt2"]
+
+[sub_resource type="FontFile" id="FontFile_w7tcc"]
+cache/0/16/0/ascent = 0.0
+cache/0/16/0/descent = 0.0
+cache/0/16/0/underline_position = 0.0
+cache/0/16/0/underline_thickness = 0.0
+cache/0/16/0/scale = 1.0
+cache/0/50/0/ascent = 0.0
+cache/0/50/0/descent = 0.0
+cache/0/50/0/underline_position = 0.0
+cache/0/50/0/underline_thickness = 0.0
+cache/0/50/0/scale = 1.0
+
+[node name="shop ui" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Button" type="Button" parent="."]
+layout_mode = 0
+offset_right = 240.0
+offset_bottom = 88.0
+theme_override_fonts/font = SubResource("FontFile_w7tcc")
+theme_override_font_sizes/font_size = 50
+text = "return me!"
+script = ExtResource("2_6rdt2")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 225.0
+offset_top = 180.0
+offset_right = 867.0
+offset_bottom = 251.0
+
+[connection signal="pressed" from="Button" to="Button" method="_on_pressed"]
