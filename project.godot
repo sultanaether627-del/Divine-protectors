@@ -10,14 +10,10 @@ config_version=5
 
 [application]
 
-config/name="GAME 123"
+config/name="Divine Protectors UI"
 run/main_scene="res://tscn/world.tscn"
 config/features=PackedStringArray("4.3", "Forward Plus")
-config/icon="res://sprites/icon.svg"
-
-[global_group]
-
-player=""
+config/icon="res://icon.svg"
 
 [input]
 
@@ -43,12 +39,6 @@ right={
 }
 shoot={
 "deadzone": 0.5,
-"events": [Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"button_mask":1,"position":Vector2(0, 0),"global_position":Vector2(0, 0),"factor":1.0,"button_index":1,"canceled":false,"pressed":false,"double_click":false,"script":null)
+"events": [Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"button_mask":1,"position":Vector2(272, 25),"global_position":Vector2(281, 71),"factor":1.0,"button_index":1,"canceled":false,"pressed":true,"double_click":false,"script":null)
 ]
 }
-
-[rendering]
-
-rendering/textures/canvas_textures/default_texture_filter=0
-rendering/2d/snap/snap_2d_transforms_to_pixel=true
-rendering/2d/snap/snap_2d_vertices_to_pixel=true
