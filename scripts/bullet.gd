@@ -4,6 +4,9 @@ extends Area2D
 @export var damage := 10.0
 @export var lifetime := 1.5
 
+# Keep this as 1 if your walls are on collision layer 1
+@export_flags_2d_physics var wall_collision_mask := 1
+
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 
 var direction := Vector2.ZERO
@@ -18,11 +21,16 @@ var bullet_sheets := {
 
 
 func _ready() -> void:
-	set_collision_mask_value(2, true)
-	body_entered.connect(_on_body_entered)
+	set_collision_mask_value(1, true) # walls
+	set_collision_mask_value(2, true) # enemies/bosses
+
+	if not body_entered.is_connected(_on_body_entered):
+		body_entered.connect(_on_body_entered)
+
 	_setup_bullet_animation()
 
 	if direction != Vector2.ZERO:
+		direction = direction.normalized()
 		rotation = direction.angle()
 
 	await get_tree().create_timer(lifetime).timeout
@@ -30,7 +38,26 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	global_position += direction * speed * delta
+	if direction == Vector2.ZERO:
+		return
+
+	var move_vector := direction.normalized() * speed * delta
+	var from := global_position
+	var to := global_position + move_vector
+
+	var query := PhysicsRayQueryParameters2D.create(from, to)
+	query.collision_mask = wall_collision_mask
+	query.collide_with_bodies = true
+	query.collide_with_areas = false
+	query.exclude = [get_rid()]
+
+	var result := get_world_2d().direct_space_state.intersect_ray(query)
+
+	if result:
+		queue_free()
+		return
+
+	global_position = to
 
 
 func _setup_bullet_animation() -> void:
@@ -39,6 +66,7 @@ func _setup_bullet_animation() -> void:
 
 	var data: Dictionary = bullet_sheets[bullet_element]
 	var texture: Texture2D = load(data["path"])
+
 	if texture == null:
 		print("Missing bullet sprite sheet: ", data["path"])
 		return
@@ -63,6 +91,10 @@ func _setup_bullet_animation() -> void:
 
 
 func _on_body_entered(body: Node) -> void:
+	if body.is_in_group("walls"):
+		queue_free()
+		return
+
 	if body.is_in_group("enemy") or body.is_in_group("boss"):
 		if body.has_method("take_damage"):
 			body.take_damage(damage)
