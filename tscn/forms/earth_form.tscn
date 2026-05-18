@@ -1,8 +1,8 @@
 [gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scripts/player_form.gd" id="1_form"]
-[ext_resource type="Texture2D" path="res://sprites/earth idle.png" id="2_idle"]
-[ext_resource type="Texture2D" path="res://sprites/earth walk.png" id="3_walk"]
+[ext_resource type="Texture2D" path="res://sprites/fire_idle.png" id="2_idle"]
+[ext_resource type="Texture2D" path="res://sprites/fire_walk.png" id="3_walk"]
 [ext_resource type="PackedScene" path="res://tscn/bullets/earth_bullet.tscn" id="4_bullet"]
 
 [sub_resource type="AtlasTexture" id="1"]
@@ -42,7 +42,7 @@ form_key = "earth"
 display_name = "Earth"
 base_max_health = 100
 bullet_scene = ExtResource("4_bullet")
-shot_origin_offset = Vector2(34, -22)
+shot_origin_offset = Vector2(0, -10)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 texture_filter = 1
@@ -51,4 +51,4 @@ animation = &"idle"
 autoplay = "idle"
 
 [node name="ShotOrigin" type="Marker2D" parent="."]
-position = Vector2(34, -22)
+position = Vector2(0, -10)

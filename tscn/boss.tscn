@@ -1,0 +1,73 @@
+[gd_scene load_steps=11 format=3 uid="uid://c6awx0bdhi4jy"]
+
+[ext_resource type="Script" path="res://scripts/boss.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://d2j7vfvom5y44" path="res://sprites/boss_body_anim.png" id="2_texture"]
+
+[sub_resource type="AtlasTexture" id="1_frame"]
+atlas = ExtResource("2_texture")
+region = Rect2(0, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="2_frame"]
+atlas = ExtResource("2_texture")
+region = Rect2(192, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="3_frame"]
+atlas = ExtResource("2_texture")
+region = Rect2(384, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="4_frame"]
+atlas = ExtResource("2_texture")
+region = Rect2(576, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="5_frame"]
+atlas = ExtResource("2_texture")
+region = Rect2(768, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="6_frame"]
+atlas = ExtResource("2_texture")
+region = Rect2(960, 0, 192, 192)
+
+[sub_resource type="SpriteFrames" id="7_frames"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("1_frame")
+}, {
+"duration": 1.0,
+"texture": SubResource("2_frame")
+}, {
+"duration": 1.0,
+"texture": SubResource("3_frame")
+}, {
+"duration": 1.0,
+"texture": SubResource("4_frame")
+}, {
+"duration": 1.0,
+"texture": SubResource("5_frame")
+}, {
+"duration": 1.0,
+"texture": SubResource("6_frame")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 6.0
+}]
+
+[sub_resource type="RectangleShape2D" id="1_shape"]
+size = Vector2(171.944, 177.685)
+
+[node name="Boss" type="CharacterBody2D" groups=["boss"]]
+scale = Vector2(1.35, 1.35)
+script = ExtResource("1_script")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+texture_filter = 1
+position = Vector2(35.3333, 70.8889)
+scale = Vector2(1.36806, 1.36806)
+sprite_frames = SubResource("7_frames")
+animation = &"idle"
+autoplay = "idle"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(38.4722, 36.3426)
+shape = SubResource("1_shape")

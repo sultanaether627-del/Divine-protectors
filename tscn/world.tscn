@@ -1,12 +1,14 @@
-[gd_scene load_steps=6 format=3 uid="uid://2majx4umo4hf"]
+[gd_scene load_steps=7 format=3 uid="uid://bdprbm6s77bjf"]
 
-[ext_resource type="PackedScene" uid="uid://bacyejtkpfvqo" path="res://tscn/player_controller.tscn" id="1_player"]
+[ext_resource type="PackedScene" uid="uid://123cf2uuuqsw" path="res://tscn/player_controller.tscn" id="1_player"]
 [ext_resource type="Texture2D" uid="uid://cijr8lxalvuws" path="res://sprites/icon.svg" id="2_icon"]
-[ext_resource type="PackedScene" path="res://tscn/enemy.tscn" id="3_enemy"]
+[ext_resource type="PackedScene" uid="uid://cmtelk2prtbkg" path="res://tscn/enemy.tscn" id="3_enemy"]
 [ext_resource type="PackedScene" uid="uid://do5udaveyommk" path="res://tscn/enemy_spawner.tscn" id="4_spawner"]
 [ext_resource type="PackedScene" path="res://tscn/game_ui.tscn" id="5_ui"]
+[ext_resource type="Script" path="res://scripts/boss_battle_timer.gd" id="6_boss_timer"]
 
 [node name="World" type="Node2D"]
+script = ExtResource("6_boss_timer")
 
 [node name="PlayerController" parent="." instance=ExtResource("1_player")]
 position = Vector2(126, 72)
@@ -20,5 +22,7 @@ texture = ExtResource("2_icon")
 position = Vector2(520, 220)
 
 [node name="EnemySpawner" parent="." instance=ExtResource("4_spawner")]
+spawn_distance = 360.0
+max_enemies = 30
 
 [node name="GameUI" parent="." instance=ExtResource("5_ui")]

@@ -1,0 +1,79 @@
+[gd_scene load_steps=11 format=3 uid="uid://cguwfv0w5yvyb"]
+
+[ext_resource type="Script" path="res://scripts/boss_fist_attack.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://vp2ls6amwylt" path="res://sprites/boss_fist_anim.png" id="2_texture"]
+
+[sub_resource type="AtlasTexture" id="1_frame"]
+atlas = ExtResource("2_texture")
+region = Rect2(0, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="2_frame"]
+atlas = ExtResource("2_texture")
+region = Rect2(192, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="3_frame"]
+atlas = ExtResource("2_texture")
+region = Rect2(384, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="4_frame"]
+atlas = ExtResource("2_texture")
+region = Rect2(576, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="5_frame"]
+atlas = ExtResource("2_texture")
+region = Rect2(768, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="6_frame"]
+atlas = ExtResource("2_texture")
+region = Rect2(960, 0, 192, 192)
+
+[sub_resource type="SpriteFrames" id="7_frames"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("1_frame")
+}, {
+"duration": 1.0,
+"texture": SubResource("2_frame")
+}, {
+"duration": 1.0,
+"texture": SubResource("3_frame")
+}, {
+"duration": 1.0,
+"texture": SubResource("4_frame")
+}, {
+"duration": 1.0,
+"texture": SubResource("5_frame")
+}, {
+"duration": 1.0,
+"texture": SubResource("6_frame")
+}],
+"loop": false,
+"name": &"smash",
+"speed": 12.0
+}]
+
+[sub_resource type="CircleShape2D" id="1_shape"]
+radius = 52.0
+
+[node name="BossFistAttack" type="Area2D"]
+scale = Vector2(0.75, 0.75)
+script = ExtResource("1_script")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+texture_filter = 1
+position = Vector2(-7.99999, -3.99999)
+scale = Vector2(1.76389, 1.76389)
+sprite_frames = SubResource("7_frames")
+animation = &"smash"
+autoplay = "smash"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(1.33333, 29.3333)
+shape = SubResource("1_shape")
+
+[node name="BlockBody" type="StaticBody2D" parent="."]
+
+[node name="BlockCollisionShape2D" type="CollisionShape2D" parent="BlockBody"]
+position = Vector2(1.33333, 29.3333)
+shape = SubResource("1_shape")

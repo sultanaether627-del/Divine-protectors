@@ -38,7 +38,7 @@ form_key = "wind"
 display_name = "Wind"
 base_max_health = 100
 bullet_scene = ExtResource("4_bullet")
-shot_origin_offset = Vector2(34, -22)
+shot_origin_offset = Vector2(0, -10)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 texture_filter = 1
@@ -47,4 +47,4 @@ animation = &"idle"
 autoplay = "idle"
 
 [node name="ShotOrigin" type="Marker2D" parent="."]
-position = Vector2(34, -22)
+position = Vector2(0, -10)

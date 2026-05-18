@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://bacyejtkpfvqo"]
+[gd_scene load_steps=4 format=3 uid="uid://123cf2uuuqsw"]
 
 [ext_resource type="Script" path="res://scripts/player_controller.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://tscn/aim_indicator.tscn" id="6_indicator"]
 
 [sub_resource type="CapsuleShape2D" id="shape"]
 radius = 34.0
@@ -16,4 +17,7 @@ shape = SubResource("shape")
 [node name="FormsRoot" type="Node2D" parent="."]
 
 [node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(1.5, 1.5)
 position_smoothing_speed = 8.0
+
+[node name="AimIndicator" parent="." instance=ExtResource("6_indicator")]

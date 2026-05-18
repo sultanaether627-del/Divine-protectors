@@ -1,0 +1,71 @@
+[gd_scene load_steps=8 format=3 uid="uid://bjrsxv6xd7uso"]
+
+[ext_resource type="PackedScene" uid="uid://c6awx0bdhi4jy" path="res://tscn/boss.tscn" id="1_boss"]
+[ext_resource type="PackedScene" uid="uid://do5udaveyommk" path="res://tscn/enemy_spawner.tscn" id="2_spawner"]
+[ext_resource type="PackedScene" path="res://tscn/boss_health_bar.tscn" id="3_boss_hp"]
+
+[sub_resource type="Gradient" id="3_gradient"]
+colors = PackedColorArray(0.1, 0.1, 0.1, 1, 0.22, 0.22, 0.22, 1)
+
+[sub_resource type="GradientTexture2D" id="4_floor_texture"]
+gradient = SubResource("3_gradient")
+width = 1280
+height = 720
+
+[sub_resource type="RectangleShape2D" id="1_wall_h"]
+size = Vector2(1280, 48)
+
+[sub_resource type="RectangleShape2D" id="2_wall_v"]
+size = Vector2(48, 720)
+
+[node name="BossArena" type="Node2D"]
+
+[node name="Floor" type="Sprite2D" parent="."]
+visible = false
+z_index = -200
+position = Vector2(640, 360)
+texture = SubResource("4_floor_texture")
+
+[node name="TopWall" type="StaticBody2D" parent="."]
+position = Vector2(640, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TopWall"]
+shape = SubResource("1_wall_h")
+
+[node name="BottomWall" type="StaticBody2D" parent="."]
+position = Vector2(640, 720)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BottomWall"]
+shape = SubResource("1_wall_h")
+
+[node name="LeftWall" type="StaticBody2D" parent="."]
+position = Vector2(0, 360)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftWall"]
+shape = SubResource("2_wall_v")
+
+[node name="RightWall" type="StaticBody2D" parent="."]
+position = Vector2(1280, 360)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightWall"]
+shape = SubResource("2_wall_v")
+
+[node name="PlayerSpawn" type="Marker2D" parent="."]
+position = Vector2(640, 505)
+
+[node name="Boss" parent="." instance=ExtResource("1_boss")]
+z_index = 5
+position = Vector2(640, 145)
+
+[node name="BossEnemySpawner" parent="." instance=ExtResource("2_spawner")]
+spawn_distance = 380.0
+max_enemies = 30
+clamp_spawn_to_rect = true
+spawn_rect_min = Vector2(90, 120)
+spawn_rect_max = Vector2(1190, 660)
+
+[node name="BossCanvas" type="CanvasLayer" parent="."]
+layer = 20
+
+[node name="BossHealthBar" parent="BossCanvas" instance=ExtResource("3_boss_hp")]
+anchors_preset = -1

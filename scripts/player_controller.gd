@@ -12,11 +12,17 @@ signal form_changed(form_name: String)
 @export var healing_per_orb := 5
 @export var bullet_damage := 10.0
 @export var character_revive_time := 60.0
+@export var ult_charge_time := 90.0
 
 @export var water_form_scene: PackedScene = preload("res://tscn/forms/water_form.tscn")
 @export var fire_form_scene: PackedScene = preload("res://tscn/forms/fire_form.tscn")
 @export var earth_form_scene: PackedScene = preload("res://tscn/forms/earth_form.tscn")
 @export var wind_form_scene: PackedScene = preload("res://tscn/forms/wind_form.tscn")
+
+@export var water_ult_scene: PackedScene = preload("res://tscn/ults/water_ult.tscn")
+@export var fire_ult_scene: PackedScene = preload("res://tscn/ults/fire_ult.tscn")
+@export var earth_ult_scene: PackedScene = preload("res://tscn/ults/earth_ult.tscn")
+@export var wind_ult_scene: PackedScene = preload("res://tscn/ults/wind_ult.tscn")
 
 @onready var forms_root: Node2D = $FormsRoot
 
@@ -28,6 +34,7 @@ var upgrade_pending := false
 
 var form_order: Array[String] = ["water", "fire", "earth", "wind"]
 var form_scenes: Dictionary = {}
+var ult_scenes: Dictionary = {}
 var form_stats: Dictionary = {}
 var active_form_key := "water"
 var active_form: Node = null
@@ -44,10 +51,21 @@ func _ready() -> void:
 		"wind": wind_form_scene
 	}
 
+	ult_scenes = {
+		"water": water_ult_scene,
+		"fire": fire_ult_scene,
+		"earth": earth_ult_scene,
+		"wind": wind_ult_scene
+	}
+
 	_build_form_stats()
 	switch_form("water", true)
 	xp_changed.emit(current_xp, xp_required, level)
 	level_changed.emit(level, current_xp, xp_required)
+
+
+func _process(delta: float) -> void:
+	_update_active_ult_charge(delta)
 
 
 func _build_form_stats() -> void:
@@ -65,7 +83,9 @@ func _build_form_stats() -> void:
 			"max_health": max_hp,
 			"health": max_hp,
 			"dead": false,
-			"revive_left": 0.0
+			"revive_left": 0.0,
+			"ult_charge": 0.0,
+			"ult_ready": false
 		}
 
 
@@ -82,6 +102,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				switch_form("earth")
 			KEY_4:
 				switch_form("wind")
+			KEY_X:
+				cast_ult()
 
 
 func _physics_process(_delta: float) -> void:
@@ -96,7 +118,8 @@ func movement() -> void:
 	var mov := Vector2(x_mov, y_mov)
 
 	if active_form and active_form.has_method("set_facing"):
-		active_form.set_facing(x_mov)
+		var aim_dir := global_position.direction_to(get_global_mouse_position())
+		active_form.set_facing(aim_dir.x)
 
 	velocity = mov.normalized() * movement_speed
 	move_and_slide()
@@ -104,7 +127,16 @@ func movement() -> void:
 
 func animate_player() -> void:
 	if active_form and active_form.has_method("play_movement"):
-		active_form.play_movement(velocity.length() > 0.0)
+		var moving := velocity.length() > 0.0
+		var walking_backwards := false
+
+		if moving:
+			var aim_dir := global_position.direction_to(get_global_mouse_position())
+			var move_dir := velocity.normalized()
+			if aim_dir != Vector2.ZERO:
+				walking_backwards = move_dir.dot(aim_dir.normalized()) < 0.0
+
+		active_form.play_movement(moving, walking_backwards)
 
 
 func shooting() -> void:
@@ -135,7 +167,7 @@ func shooting() -> void:
 	if active_form.has_method("get_shot_position"):
 		bullet.global_position = active_form.get_shot_position()
 	else:
-		bullet.global_position = global_position + aim_dir * 34 + Vector2(0, -22)
+		bullet.global_position = global_position
 
 	bullet.direction = aim_dir
 	bullet.damage = bullet_damage
@@ -291,8 +323,6 @@ func apply_upgrade(upgrade_type: String, percent: int) -> void:
 			bullet_damage = max(1.0, bullet_damage * multiplier)
 			print("Damage upgraded by ", percent, "% Bullet damage: ", bullet_damage)
 		"health":
-			# Health is NOT universal: only the currently selected character gets more max HP.
-			# The current HP does not increase immediately; it must be healed back through XP orbs.
 			form_stats[active_form_key]["max_health"] = int(ceil(float(form_stats[active_form_key]["max_health"]) * multiplier))
 			form_stats[active_form_key]["health"] = int(clamp(int(form_stats[active_form_key]["health"]), 0, int(form_stats[active_form_key]["max_health"])))
 			_emit_health()
@@ -300,3 +330,59 @@ func apply_upgrade(upgrade_type: String, percent: int) -> void:
 
 	upgrade_pending = false
 	get_tree().paused = false
+
+
+func _update_active_ult_charge(delta: float) -> void:
+	if get_tree().paused:
+		return
+	if not form_stats.has(active_form_key):
+		return
+	if bool(form_stats[active_form_key]["dead"]):
+		return
+	if bool(form_stats[active_form_key]["ult_ready"]):
+		return
+
+	form_stats[active_form_key]["ult_charge"] = min(ult_charge_time, float(form_stats[active_form_key]["ult_charge"]) + delta)
+	if float(form_stats[active_form_key]["ult_charge"]) >= ult_charge_time:
+		form_stats[active_form_key]["ult_ready"] = true
+		print(form_stats[active_form_key]["display"], " ult ready! Press X.")
+
+
+func cast_ult() -> void:
+	if is_active_form_dead():
+		return
+	if not bool(form_stats[active_form_key].get("ult_ready", false)):
+		print(form_stats[active_form_key]["display"], " ult is not ready yet.")
+		return
+	if not ult_scenes.has(active_form_key):
+		return
+
+	var ult_scene: PackedScene = ult_scenes[active_form_key]
+	if ult_scene == null:
+		return
+
+	var ult = ult_scene.instantiate()
+
+	# Set the position BEFORE adding it to the scene.
+	# Godot runs _ready() as soon as the node enters the tree,
+	# so setting this after add_child() makes the ult effect apply at (0, 0).
+	ult.global_position = global_position + Vector2(0, 26)
+	ult.z_index = -50
+
+	get_tree().current_scene.add_child(ult)
+
+	form_stats[active_form_key]["ult_charge"] = 0.0
+	form_stats[active_form_key]["ult_ready"] = false
+	print("CAST ULT: ", form_stats[active_form_key]["display"])
+
+
+func apply_water_ult() -> void:
+	for key in form_order:
+		if not form_stats.has(key):
+			continue
+		form_stats[key]["dead"] = false
+		form_stats[key]["revive_left"] = 0.0
+		form_stats[key]["health"] = int(form_stats[key]["max_health"])
+
+	_emit_health()
+	print("Water ult: all characters fully healed and revived.")

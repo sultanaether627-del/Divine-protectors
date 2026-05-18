@@ -1,16 +1,30 @@
-[gd_scene load_steps=4 format=3 uid="uid://2nmijnie5jmv"]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="PackedScene" path="res://tscn/health_bar.tscn" id="1_health"]
 [ext_resource type="PackedScene" path="res://tscn/xp_bar.tscn" id="2_xp"]
 [ext_resource type="PackedScene" path="res://tscn/upgrade_panel.tscn" id="3_upgrade"]
+[ext_resource type="PackedScene" path="res://tscn/party_ui.tscn" id="4_party"]
+[ext_resource type="Script" path="res://scripts/boss_timer_label.gd" id="5_boss_timer_label"]
 
 [node name="GameUI" type="CanvasLayer"]
 layer = 10
 
 [node name="HealthBar" parent="." instance=ExtResource("1_health")]
-anchors_preset = -1
 
 [node name="XPBar" parent="." instance=ExtResource("2_xp")]
-anchors_preset = -1
 
 [node name="UpgradePanel" parent="." instance=ExtResource("3_upgrade")]
+
+[node name="PartyUI" parent="." instance=ExtResource("4_party")]
+
+[node name="BossTimerLabel" type="Label" parent="."]
+anchors_preset = 10
+anchor_left = 0.42
+anchor_top = 0.0
+anchor_right = 0.58
+anchor_bottom = 0.0
+offset_top = 82.0
+offset_bottom = 112.0
+text = "Boss in 15:00"
+horizontal_alignment = 1
+script = ExtResource("5_boss_timer_label")

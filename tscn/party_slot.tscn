@@ -1,0 +1,79 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/party_slot.gd" id="1_script"]
+
+[node name="PartySlot" type="PanelContainer"]
+custom_minimum_size = Vector2(170, 56)
+script = ExtResource("1_script")
+
+[node name="ActiveMarker" type="ColorRect" parent="."]
+layout_mode = 2
+color = Color(1, 0.82, 0.18, 0.55)
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+offset_left = 8.0
+offset_top = 5.0
+offset_right = 160.0
+offset_bottom = 51.0
+
+[node name="Icon" type="TextureRect" parent="HBoxContainer"]
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="InfoBox" type="VBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="NameLabel" type="Label" parent="HBoxContainer/InfoBox"]
+layout_mode = 2
+text = "Water"
+
+[node name="HPBar" type="ProgressBar" parent="HBoxContainer/InfoBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+show_percentage = false
+max_value = 100.0
+value = 100.0
+
+[node name="CooldownLabel" type="Label" parent="HBoxContainer/InfoBox"]
+layout_mode = 2
+text = ""
+horizontal_alignment = 1
+
+[node name="KeyLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -26.0
+offset_top = 2.0
+offset_right = -8.0
+offset_bottom = 22.0
+grow_horizontal = 0
+text = "1"
+horizontal_alignment = 1
+
+[node name="UltReadyIcon" type="TextureRect" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -42.0
+offset_top = -38.0
+offset_right = -6.0
+offset_bottom = -2.0
+grow_horizontal = 0
+grow_vertical = 0
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DeadOverlay" type="ColorRect" parent="."]
+visible = false
+layout_mode = 2
+color = Color(0, 0, 0, 0.45)

@@ -11,14 +11,14 @@ var direction := Vector2.ZERO
 
 var bullet_sheets := {
 	"water": {"path": "res://sprites/water bullets anim.png", "frames": 2},
-	# Placeholder until you draw fire bullets.
-	"fire": {"path": "res://sprites/water bullets anim.png", "frames": 2},
+	"fire": {"path": "res://sprites/fire_bullet.png", "frames": 2},
 	"earth": {"path": "res://sprites/earth bullet anim.png", "frames": 2},
 	"wind": {"path": "res://sprites/wind bullet anim.png", "frames": 2}
 }
 
 
 func _ready() -> void:
+	set_collision_mask_value(2, true)
 	body_entered.connect(_on_body_entered)
 	_setup_bullet_animation()
 
@@ -63,7 +63,7 @@ func _setup_bullet_animation() -> void:
 
 
 func _on_body_entered(body: Node) -> void:
-	if body.is_in_group("enemy"):
+	if body.is_in_group("enemy") or body.is_in_group("boss"):
 		if body.has_method("take_damage"):
 			body.take_damage(damage)
 		queue_free()

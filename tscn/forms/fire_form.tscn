@@ -34,7 +34,7 @@ atlas = ExtResource("3_walk")
 region = Rect2(576, 0, 192, 192)
 
 [sub_resource type="SpriteFrames" id="frames"]
-animations = [{"frames": [{"duration": 1.0, "texture": SubResource("1")}, {"duration": 1.0, "texture": SubResource("2")}, {"duration": 1.0, "texture": SubResource("3")}], "loop": true, "name": &"idle", "speed": 5.0}, {"frames": [{"duration": 1.0, "texture": SubResource("4")}, {"duration": 1.0, "texture": SubResource("5")}, {"duration": 1.0, "texture": SubResource("6")}, {"duration": 1.0, "texture": SubResource("7")}], "loop": true, "name": &"walk", "speed": 8.0}]
+animations = [{"frames": [{"duration": 1.0, "texture": SubResource("1")}, {"duration": 1.0, "texture": SubResource("2")}, {"duration": 1.0, "texture": SubResource("3")}], "loop": true, "name": &"idle", "speed": 6.0}, {"frames": [{"duration": 1.0, "texture": SubResource("4")}, {"duration": 1.0, "texture": SubResource("5")}, {"duration": 1.0, "texture": SubResource("6")}, {"duration": 1.0, "texture": SubResource("7")}], "loop": true, "name": &"walk", "speed": 10.0}]
 
 [node name="FireForm" type="Node2D"]
 script = ExtResource("1_form")
@@ -42,7 +42,7 @@ form_key = "fire"
 display_name = "Fire"
 base_max_health = 100
 bullet_scene = ExtResource("4_bullet")
-shot_origin_offset = Vector2(34, -22)
+shot_origin_offset = Vector2(0, -10)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 texture_filter = 1
@@ -51,4 +51,4 @@ animation = &"idle"
 autoplay = "idle"
 
 [node name="ShotOrigin" type="Marker2D" parent="."]
-position = Vector2(34, -22)
+position = Vector2(0, -10)
