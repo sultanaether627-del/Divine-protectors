@@ -3,7 +3,7 @@ extends CharacterBody2D
 signal health_changed(current_health: float, max_health: float)
 signal boss_defeated
 
-@export var max_health := 1000.0
+@export var max_health := 500000.0
 @export var fist_attack_scene: PackedScene = preload("res://tscn/boss_fist_attack.tscn")
 @export var attack_interval := 4.0
 @export var attack_damage := 150
