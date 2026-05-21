@@ -1,9 +1,13 @@
 extends CharacterBody2D
 
+const DEBUG_COMBAT := false
+
 @export var movement_speed := 80.0
 @export var max_health := 30.0
 @export var damage := 10
 @export var damage_cooldown := 0.8
+@export var separation_radius := 28.0
+@export var separation_strength := 60.0
 @export var xp_drop_scene: PackedScene = preload("res://tscn/xp_drop.tscn")
 @export var xp_drops_on_death := 1
 
@@ -41,6 +45,9 @@ func _physics_process(_delta: float) -> void:
 	if player:
 		var direction := global_position.direction_to(player.global_position)
 		velocity = direction * movement_speed
+		
+		_apply_separation()
+		
 		move_and_slide()
 
 		if direction.x > 0:
@@ -74,12 +81,34 @@ func check_player_collision() -> void:
 			can_damage = true
 
 
+func _apply_separation() -> void:
+	var enemies: Array = get_tree().get_nodes_in_group("enemy")
+	var separation := Vector2.ZERO
+	var count := 0
+	
+	for other in enemies:
+		if other == self or not is_instance_valid(other):
+			continue
+		var dist := global_position.distance_to(other.global_position)
+		if dist < separation_radius and dist > 0.01:
+			var away := global_position.direction_to(other.global_position)
+			separation -= away * (1.0 - dist / separation_radius)
+			count += 1
+	
+	if count > 0:
+		velocity += separation * separation_strength
+
+
 func take_damage(amount: float) -> void:
 	if is_dead:
 		return
 
 	health -= amount
-	print("Enemy health: ", health)
+	
+	_flash_hit()
+	
+	if DEBUG_COMBAT:
+		print("Enemy health: ", health)
 
 	if health <= 0:
 		die()
@@ -104,12 +133,31 @@ func kill_without_xp() -> void:
 
 
 func _safe_die() -> void:
+	_death_effect()
+	await get_tree().create_timer(0.15).timeout
+	
 	for i in range(xp_drops_on_death):
 		var xp_drop = xp_drop_scene.instantiate()
 		get_tree().current_scene.add_child(xp_drop)
 		xp_drop.global_position = global_position + Vector2(randf_range(-16, 16), randf_range(-16, 16))
 
 	queue_free()
+
+
+func _flash_hit() -> void:
+	if sprite:
+		sprite.modulate = Color(3, 3, 3, 1)
+		var tween := create_tween()
+		tween.tween_property(sprite, "modulate", Color(1, 1, 1, 1), 0.1)
+
+
+func _death_effect() -> void:
+	if sprite:
+		sprite.modulate = Color(1, 0.3, 0.3, 1)
+		var tween := create_tween()
+		tween.set_parallel(true)
+		tween.tween_property(sprite, "modulate:a", 0.0, 0.15)
+		tween.tween_property(sprite, "scale", Vector2(1.3, 1.3), 0.15)
 
 
 func apply_push_from(origin: Vector2, push_distance: float) -> void:

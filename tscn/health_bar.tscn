@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/health_bar.gd" id="1_health"]
+[ext_resource type="Texture2D" path="res://UI-20260510T082413Z-3-001/UI/heart.png" id="2_heart"]
 
 [node name="HealthBar" type="ProgressBar"]
 anchors_preset = 10
@@ -11,6 +12,21 @@ anchor_bottom = 0.0
 offset_top = 16.0
 offset_bottom = 44.0
 script = ExtResource("1_health")
+
+[node name="HeartIcon" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = -28.0
+offset_top = -2.0
+offset_right = -4.0
+offset_bottom = 26.0
+texture = ExtResource("2_heart")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="HealthText" type="Label" parent="."]
 layout_mode = 1

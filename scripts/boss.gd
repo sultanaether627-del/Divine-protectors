@@ -1,5 +1,7 @@
 extends CharacterBody2D
 
+const DEBUG_COMBAT := false
+
 signal health_changed(current_health: float, max_health: float)
 signal boss_defeated
 
@@ -56,7 +58,8 @@ func take_damage(amount: float) -> void:
 
 	health = max(0.0, health - amount)
 	health_changed.emit(health, max_health)
-	print("Boss HP: ", health)
+	if DEBUG_COMBAT:
+		print("Boss HP: ", health)
 
 	if health <= 0.0:
 		die()

@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://dkew1gs84bw8u"]
+[gd_scene load_steps=10 format=3 uid="uid://dkew1gs84bw8u"]
 
 [ext_resource type="Texture2D" uid="uid://vcc3rxx6qnyw" path="res://UI-20260510T082413Z-3-001/UI/play.png" id="1_ib1pf"]
 [ext_resource type="Texture2D" uid="uid://b4rqf366ica3a" path="res://pixel_art__dungeon_entrance_door_by_kristyglas_ddto0gw-pre.jpg" id="1_oankt"]
@@ -7,6 +7,8 @@
 [ext_resource type="Script" path="res://Ui button testing final res/shop.gd" id="4_v5jay"]
 [ext_resource type="Texture2D" uid="uid://c3vx0upklexd2" path="res://UI-20260510T082413Z-3-001/UI/setting.png" id="5_p6tyi"]
 [ext_resource type="Script" path="res://Ui button testing final res/settings.gd" id="7_rx4aj"]
+[ext_resource type="Texture2D" uid="uid://dil7oajkkdqyn" path="res://UI-20260510T082413Z-3-001/UI/quit.png" id="8_quit"]
+[ext_resource type="Script" path="res://Ui button testing final res/quit.gd" id="9_quit"]
 
 [node name="Control" type="Control"]
 layout_mode = 3
@@ -51,6 +53,17 @@ icon = ExtResource("5_p6tyi")
 flat = true
 script = ExtResource("7_rx4aj")
 
+[node name="quit" type="Button" parent="."]
+layout_mode = 0
+offset_left = 28.0
+offset_top = 520.0
+offset_right = 360.0
+offset_bottom = 624.0
+icon = ExtResource("8_quit")
+flat = true
+script = ExtResource("9_quit")
+
 [connection signal="pressed" from="play button" to="play button" method="_on_pressed"]
 [connection signal="pressed" from="shop" to="shop" method="_on_pressed"]
 [connection signal="pressed" from="settings" to="settings" method="_on_pressed"]
+[connection signal="pressed" from="quit" to="quit" method="_on_pressed"]

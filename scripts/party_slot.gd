@@ -48,11 +48,27 @@ func update_slot(current_hp: int, max_hp: int, is_active: bool, revive_left: flo
 	elif is_active:
 		if ult_ready:
 			cooldown_label.text = "ULT READY"
+			cooldown_label.modulate = Color(1, 0.85, 0.2, 1)
+			_pulse_ult_ready()
 		else:
 			var percent: int = int(clamp((ult_charge / max(1.0, ult_charge_time)) * 100.0, 0.0, 100.0))
 			cooldown_label.text = "ULT %d%%" % percent
+			cooldown_label.modulate = Color(1, 1, 1, 1)
 		cooldown_label.visible = true
 		modulate = Color(1.0, 1.0, 1.0, 1.0)
 	else:
 		cooldown_label.text = ""
 		modulate = Color(0.82, 0.82, 0.82, 1.0)
+
+
+func _pulse_ult_ready() -> void:
+	if not has_node("UltReadyIcon"):
+		return
+	var icon: TextureRect = $UltReadyIcon
+	if icon and not icon.visible:
+		icon.visible = true
+		icon.modulate.a = 0.6
+		var tween := create_tween()
+		tween.set_loops()
+		tween.tween_property(icon, "modulate:a", 1.0, 0.4)
+		tween.tween_property(icon, "modulate:a", 0.6, 0.4)

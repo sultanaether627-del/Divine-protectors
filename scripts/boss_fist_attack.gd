@@ -1,5 +1,7 @@
 extends Area2D
 
+const DEBUG_BOSS := false
+
 @export var warning_time := 1.0
 @export var damage := 150
 @export var linger_time := 0.2
@@ -63,5 +65,6 @@ func _check_hit() -> void:
 		if body and body.is_in_group("player") and body.has_method("take_damage"):
 			has_hit = true
 			body.take_damage(damage)
-			print("Boss fist hit player for ", damage)
+			if DEBUG_BOSS:
+				print("Boss fist hit ", body.name, " for ", damage)
 			return

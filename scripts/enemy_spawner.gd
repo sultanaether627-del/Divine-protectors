@@ -1,5 +1,7 @@
 extends Node2D
 
+const DEBUG_SPAWN := false
+
 @export var enemy_scene: PackedScene = preload("res://tscn/enemy.tscn")
 @export var fast_enemy_scene: PackedScene = preload("res://tscn/enemy_fast.tscn")
 @export var tank_enemy_scene: PackedScene = preload("res://tscn/enemy_tank.tscn")
@@ -61,7 +63,8 @@ func _ready() -> void:
 	spawn_loop()
 	difficulty_loop()
 
-	print("EnemySpawner started")
+	if DEBUG_SPAWN:
+		print("EnemySpawner started")
 
 
 func _process(delta: float) -> void:

@@ -1,5 +1,7 @@
 extends Area2D
 
+const DEBUG_COMBAT := false
+
 @export var speed := 700.0
 @export var damage := 10.0
 @export var lifetime := 1.5
@@ -11,6 +13,8 @@ extends Area2D
 
 var direction := Vector2.ZERO
 @export var bullet_element := "water"
+var speed_mult := 1.0
+var size_mult := 1.0
 
 var bullet_sheets := {
 	"water": {"path": "res://sprites/water bullets anim.png", "frames": 2},
@@ -28,6 +32,9 @@ func _ready() -> void:
 		body_entered.connect(_on_body_entered)
 
 	_setup_bullet_animation()
+	
+	if size_mult != 1.0 and sprite:
+		sprite.scale = Vector2(size_mult, size_mult)
 
 	if direction != Vector2.ZERO:
 		direction = direction.normalized()
@@ -41,7 +48,7 @@ func _physics_process(delta: float) -> void:
 	if direction == Vector2.ZERO:
 		return
 
-	var move_vector := direction.normalized() * speed * delta
+	var move_vector := direction.normalized() * speed * speed_mult * delta
 	var from := global_position
 	var to := global_position + move_vector
 
@@ -68,7 +75,8 @@ func _setup_bullet_animation() -> void:
 	var texture: Texture2D = load(data["path"])
 
 	if texture == null:
-		print("Missing bullet sprite sheet: ", data["path"])
+		if DEBUG_COMBAT:
+			print("Missing bullet sprite sheet: ", data["path"])
 		return
 
 	var frames := SpriteFrames.new()
@@ -98,4 +106,6 @@ func _on_body_entered(body: Node) -> void:
 	if body.is_in_group("enemy") or body.is_in_group("boss"):
 		if body.has_method("take_damage"):
 			body.take_damage(damage)
+			if DEBUG_COMBAT:
+				print("Bullet hit ", body.name, " for ", damage, " damage")
 		queue_free()

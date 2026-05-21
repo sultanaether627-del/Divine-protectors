@@ -36,20 +36,18 @@ func _physics_process(delta: float) -> void:
 	if player == null or collected:
 		return
 
+	var effective_attract := attract_distance
+	if player.has_method("get") and player.get("pickup_range") != null:
+		effective_attract = float(player.pickup_range)
+
 	var distance := global_position.distance_to(player.global_position)
 
-	# start attraction
-	if distance <= attract_distance:
+	if distance <= effective_attract:
 		var direction := global_position.direction_to(player.global_position)
+		var t: float = 1.0 - clamp(distance / effective_attract, 0.0, 1.0)
+		var speed: float = lerp(float(move_speed), float(max_move_speed), t * t)
+		global_position += direction * speed * delta
 
-		current_speed = min(
-			current_speed + acceleration * 100.0 * delta,
-			max_move_speed
-		)
-
-		global_position += direction * current_speed * delta
-
-	# collect XP
 	if distance <= collect_distance:
 		collect()
 
@@ -64,6 +62,13 @@ func collect() -> void:
 		return
 
 	collected = true
+	
+	if sprite:
+		var tween := create_tween()
+		tween.set_parallel(true)
+		tween.tween_property(sprite, "modulate:a", 0.0, 0.15)
+		tween.tween_property(sprite, "scale", Vector2(1.8, 1.8), 0.15)
+		await tween.finished
 
 	if player:
 		if player.has_method("collect_xp_orb"):

@@ -1,5 +1,7 @@
 extends CharacterBody2D
 
+const DEBUG_COMBAT := false
+
 signal health_changed(current_health: int, max_health: int)
 signal xp_changed(current_xp: int, xp_required: int, level: int)
 signal level_changed(level: int, current_xp: int, xp_required: int)
@@ -7,12 +9,21 @@ signal upgrade_options_ready(options: Array)
 signal form_changed(form_name: String)
 
 @export var movement_speed := 400.0
+@export var acceleration := 2000.0
+@export var deceleration := 1600.0
 @export var shoot_cooldown := 0.25
 @export var starting_xp_required := 10
 @export var healing_per_orb := 5
 @export var bullet_damage := 10.0
 @export var character_revive_time := 60.0
 @export var ult_charge_time := 90.0
+
+var pickup_range := 180.0
+var armor := 0.0
+var projectile_speed_mult := 1.0
+var projectile_size_mult := 1.0
+var multi_shot_count := 1
+var xp_multiplier := 1.0
 
 @export var water_form_scene: PackedScene = preload("res://tscn/forms/water_form.tscn")
 @export var fire_form_scene: PackedScene = preload("res://tscn/forms/fire_form.tscn")
@@ -115,13 +126,19 @@ func _physics_process(_delta: float) -> void:
 func movement() -> void:
 	var x_mov := Input.get_action_strength("right") - Input.get_action_strength("left")
 	var y_mov := Input.get_action_strength("down") - Input.get_action_strength("up")
-	var mov := Vector2(x_mov, y_mov)
+	var input_dir := Vector2(x_mov, y_mov)
 
 	if active_form and active_form.has_method("set_facing"):
 		var aim_dir := global_position.direction_to(get_global_mouse_position())
 		active_form.set_facing(aim_dir.x)
 
-	velocity = mov.normalized() * movement_speed
+	var target_velocity := input_dir.normalized() * movement_speed
+	
+	if input_dir.length() > 0.01:
+		velocity = velocity.move_toward(target_velocity, acceleration * get_physics_process_delta_time())
+	else:
+		velocity = velocity.move_toward(Vector2.ZERO, deceleration * get_physics_process_delta_time())
+	
 	move_and_slide()
 
 
@@ -161,17 +178,24 @@ func shooting() -> void:
 	if aim_dir == Vector2.ZERO:
 		aim_dir = Vector2.RIGHT
 
-	var bullet = current_bullet_scene.instantiate()
-	get_tree().current_scene.add_child(bullet)
+	for shot in range(multi_shot_count):
+		var bullet = current_bullet_scene.instantiate()
+		get_tree().current_scene.add_child(bullet)
 
-	if active_form.has_method("get_shot_position"):
-		bullet.global_position = active_form.get_shot_position()
-	else:
-		bullet.global_position = global_position
+		if active_form.has_method("get_shot_position"):
+			bullet.global_position = active_form.get_shot_position()
+		else:
+			bullet.global_position = global_position
 
-	bullet.direction = aim_dir
-	bullet.damage = bullet_damage
-	bullet.rotation = aim_dir.angle()
+		var spread_angle := 0.0
+		if multi_shot_count > 1:
+			spread_angle = deg_to_rad(8.0) * (shot - (multi_shot_count - 1) / 2.0)
+		var shot_dir := aim_dir.rotated(spread_angle)
+		bullet.direction = shot_dir
+		bullet.damage = bullet_damage
+		bullet.rotation = shot_dir.angle()
+		bullet.speed_mult = projectile_speed_mult
+		bullet.size_mult = projectile_size_mult
 
 	await get_tree().create_timer(shoot_cooldown).timeout
 	can_shoot = true
@@ -183,7 +207,8 @@ func switch_form(form_key: String, force := false) -> void:
 	if form_key == active_form_key and not force:
 		return
 	if form_stats.has(form_key) and bool(form_stats[form_key]["dead"]):
-		print(form_stats[form_key]["display"], " is knocked out. Revive left: ", int(ceil(float(form_stats[form_key]["revive_left"]))), "s")
+		if DEBUG_COMBAT:
+			print(form_stats[form_key]["display"], " is knocked out. Revive left: ", int(ceil(float(form_stats[form_key]["revive_left"]))), "s")
 		return
 
 	if active_form:
@@ -197,7 +222,8 @@ func switch_form(form_key: String, force := false) -> void:
 
 	_emit_health()
 	form_changed.emit(form_stats[active_form_key]["display"])
-	print("Switched to ", form_stats[active_form_key]["display"])
+	if DEBUG_COMBAT:
+		print("Switched to ", form_stats[active_form_key]["display"])
 
 
 func is_active_form_dead() -> bool:
@@ -208,9 +234,14 @@ func take_damage(amount: int) -> void:
 	if is_active_form_dead():
 		return
 
-	form_stats[active_form_key]["health"] = int(clamp(int(form_stats[active_form_key]["health"]) - amount, 0, int(form_stats[active_form_key]["max_health"])))
+	var reduced := int(ceil(float(amount) * (1.0 - armor)))
+	form_stats[active_form_key]["health"] = int(clamp(int(form_stats[active_form_key]["health"]) - reduced, 0, int(form_stats[active_form_key]["max_health"])))
 	_emit_health()
-	print(form_stats[active_form_key]["display"], " health: ", form_stats[active_form_key]["health"])
+	
+	_shake_camera(4.0, 0.08)
+	
+	if DEBUG_COMBAT:
+		print(form_stats[active_form_key]["display"], " health: ", form_stats[active_form_key]["health"])
 
 	if int(form_stats[active_form_key]["health"]) <= 0:
 		_knock_out_active_form()
@@ -221,7 +252,8 @@ func heal(amount: int) -> void:
 		return
 	form_stats[active_form_key]["health"] = int(clamp(int(form_stats[active_form_key]["health"]) + amount, 0, int(form_stats[active_form_key]["max_health"])))
 	_emit_health()
-	print("Healed ", form_stats[active_form_key]["display"], ": +", amount, " HP: ", form_stats[active_form_key]["health"], "/", form_stats[active_form_key]["max_health"])
+	if DEBUG_COMBAT:
+		print("Healed ", form_stats[active_form_key]["display"], ": +", amount, " HP: ", form_stats[active_form_key]["health"], "/", form_stats[active_form_key]["max_health"])
 
 
 func _knock_out_active_form() -> void:
@@ -230,7 +262,8 @@ func _knock_out_active_form() -> void:
 	form_stats[dead_form]["health"] = 0
 	form_stats[dead_form]["revive_left"] = character_revive_time
 	_emit_health()
-	print(form_stats[dead_form]["display"], " knocked out. Revives in ", int(character_revive_time), " seconds.")
+	if DEBUG_COMBAT:
+		print(form_stats[dead_form]["display"], " knocked out. Revives in ", int(character_revive_time), " seconds.")
 	_revive_countdown(dead_form)
 
 	var next_form := _find_alive_form(dead_form)
@@ -255,7 +288,8 @@ func _revive_countdown(form_key: String) -> void:
 	form_stats[form_key]["dead"] = false
 	form_stats[form_key]["health"] = int(form_stats[form_key]["max_health"])
 	form_stats[form_key]["revive_left"] = 0.0
-	print(form_stats[form_key]["display"], " is back!")
+	if DEBUG_COMBAT:
+		print(form_stats[form_key]["display"], " is back!")
 	if form_key == active_form_key:
 		_emit_health()
 
@@ -265,9 +299,29 @@ func _emit_health() -> void:
 
 
 func die() -> void:
-	print("All characters died")
+	if DEBUG_COMBAT:
+		print("All characters died")
 	get_tree().paused = false
-	get_tree().reload_current_scene()
+	
+	var game_over := get_tree().get_first_node_in_group("game_over")
+	if game_over == null:
+		var nodes := get_tree().get_nodes_in_group("game_over")
+		if nodes.size() > 0:
+			game_over = nodes[0]
+	
+	if game_over and game_over.has_method("show_game_over"):
+		var survival_time := 0.0
+		var spawner := get_tree().get_first_node_in_group("enemy_spawner")
+		if spawner == null:
+			var spawners := get_tree().get_nodes_in_group("enemy_spawner")
+			if spawners.size() > 0:
+				spawner = spawners[0]
+		if spawner and spawner.get("elapsed_game_time") != null:
+			survival_time = float(spawner.elapsed_game_time)
+		
+		game_over.show_game_over(level, survival_time, false)
+	else:
+		get_tree().reload_current_scene()
 
 
 func collect_xp_orb(amount: int) -> void:
@@ -276,14 +330,14 @@ func collect_xp_orb(amount: int) -> void:
 
 
 func add_xp(amount: int) -> void:
-	current_xp += amount
+	current_xp += int(ceil(float(amount) * xp_multiplier))
 
 	while current_xp >= xp_required:
 		current_xp -= xp_required
 		level += 1
 		xp_required = int(ceil(float(xp_required) * 1.10))
-		print("LEVEL UP! Level: ", level)
 		level_changed.emit(level, current_xp, xp_required)
+		_level_up_effect()
 		_start_upgrade_choice()
 		break
 
@@ -300,7 +354,7 @@ func _start_upgrade_choice() -> void:
 
 
 func _make_upgrade_options() -> Array:
-	var types: Array[String] = ["fire_rate", "healing", "damage", "health"]
+	var types: Array[String] = ["fire_rate", "healing", "damage", "health", "movement_speed", "pickup_range", "armor", "projectile_speed", "projectile_size", "multi_shot", "xp_multiplier"]
 	types.shuffle()
 	var options: Array = []
 	for i in range(3):
@@ -315,21 +369,65 @@ func apply_upgrade(upgrade_type: String, percent: int) -> void:
 	match upgrade_type:
 		"fire_rate":
 			shoot_cooldown = max(0.05, shoot_cooldown * (1.0 - float(percent) / 100.0))
-			print("Fire rate upgraded by ", percent, "% Cooldown: ", shoot_cooldown)
+			if DEBUG_COMBAT:
+				print("Fire rate upgraded by ", percent, "% Cooldown: ", shoot_cooldown)
 		"healing":
 			healing_per_orb = max(1, int(ceil(float(healing_per_orb) * multiplier)))
-			print("Healing upgraded by ", percent, "% Heal/orb: ", healing_per_orb)
+			if DEBUG_COMBAT:
+				print("Healing upgraded by ", percent, "% Heal/orb: ", healing_per_orb)
 		"damage":
 			bullet_damage = max(1.0, bullet_damage * multiplier)
-			print("Damage upgraded by ", percent, "% Bullet damage: ", bullet_damage)
+			if DEBUG_COMBAT:
+				print("Damage upgraded by ", percent, "% Bullet damage: ", bullet_damage)
 		"health":
 			form_stats[active_form_key]["max_health"] = int(ceil(float(form_stats[active_form_key]["max_health"]) * multiplier))
 			form_stats[active_form_key]["health"] = int(clamp(int(form_stats[active_form_key]["health"]), 0, int(form_stats[active_form_key]["max_health"])))
 			_emit_health()
-			print("Max HP upgraded by ", percent, "% for ", form_stats[active_form_key]["display"], ". Max HP: ", form_stats[active_form_key]["max_health"])
+		"movement_speed":
+			movement_speed = max(100.0, movement_speed * multiplier)
+		"pickup_range":
+			pickup_range = max(50.0, pickup_range * multiplier)
+		"armor":
+			armor = min(0.8, armor + float(percent) / 100.0)
+		"projectile_speed":
+			projectile_speed_mult = max(0.5, projectile_speed_mult * multiplier)
+		"projectile_size":
+			projectile_size_mult = max(0.3, projectile_size_mult * multiplier)
+		"multi_shot":
+			multi_shot_count = min(5, multi_shot_count + 1)
+		"xp_multiplier":
+			xp_multiplier = max(0.5, xp_multiplier * multiplier)
 
 	upgrade_pending = false
 	get_tree().paused = false
+
+
+func _shake_camera(strength: float, duration: float) -> void:
+	var camera: Camera2D = $Camera2D
+	if camera:
+		var original_offset := camera.offset
+		var tween := create_tween()
+		var steps := int(duration / 0.02)
+		for _i in range(steps):
+			tween.tween_callback(func():
+				camera.offset = original_offset + Vector2(randf_range(-strength, strength), randf_range(-strength, strength))
+			)
+			tween.tween_interval(0.02)
+		tween.tween_callback(func(): camera.offset = original_offset)
+
+
+func _level_up_effect() -> void:
+	if active_form and active_form.has_node("AnimatedSprite2D"):
+		var s: AnimatedSprite2D = active_form.get_node("AnimatedSprite2D")
+		var tween := create_tween()
+		tween.set_parallel(true)
+		tween.tween_property(s, "modulate", Color(1.5, 1.5, 2.0, 1), 0.1)
+		tween.tween_property(s, "scale", Vector2(1.15, 1.15), 0.1)
+		tween.tween_interval(0.1)
+		tween.tween_property(s, "modulate", Color(1, 1, 1, 1), 0.2)
+		tween.tween_property(s, "scale", Vector2(1, 1), 0.2)
+	
+	_shake_camera(2.0, 0.06)
 
 
 func _update_active_ult_charge(delta: float) -> void:
@@ -345,14 +443,16 @@ func _update_active_ult_charge(delta: float) -> void:
 	form_stats[active_form_key]["ult_charge"] = min(ult_charge_time, float(form_stats[active_form_key]["ult_charge"]) + delta)
 	if float(form_stats[active_form_key]["ult_charge"]) >= ult_charge_time:
 		form_stats[active_form_key]["ult_ready"] = true
-		print(form_stats[active_form_key]["display"], " ult ready! Press X.")
+		if DEBUG_COMBAT:
+			print(form_stats[active_form_key]["display"], " ult ready! Press X.")
 
 
 func cast_ult() -> void:
 	if is_active_form_dead():
 		return
 	if not bool(form_stats[active_form_key].get("ult_ready", false)):
-		print(form_stats[active_form_key]["display"], " ult is not ready yet.")
+		if DEBUG_COMBAT:
+			print(form_stats[active_form_key]["display"], " ult is not ready yet.")
 		return
 	if not ult_scenes.has(active_form_key):
 		return
@@ -373,7 +473,8 @@ func cast_ult() -> void:
 
 	form_stats[active_form_key]["ult_charge"] = 0.0
 	form_stats[active_form_key]["ult_ready"] = false
-	print("CAST ULT: ", form_stats[active_form_key]["display"])
+	if DEBUG_COMBAT:
+		print("CAST ULT: ", form_stats[active_form_key]["display"])
 
 
 func apply_water_ult() -> void:
@@ -385,4 +486,5 @@ func apply_water_ult() -> void:
 		form_stats[key]["health"] = int(form_stats[key]["max_health"])
 
 	_emit_health()
-	print("Water ult: all characters fully healed and revived.")
+	if DEBUG_COMBAT:
+		print("Water ult: all characters fully healed and revived.")

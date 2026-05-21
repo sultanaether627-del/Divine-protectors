@@ -1,5 +1,7 @@
 extends Node2D
 
+const DEBUG_BOSS := false
+
 signal boss_timer_changed(time_left: float)
 signal boss_battle_started
 
@@ -38,7 +40,8 @@ func _start_boss_battle() -> void:
 		return
 
 	boss_started = true
-	print("Boss battle unlocked!")
+	if DEBUG_BOSS:
+		print("Boss battle unlocked!")
 
 	player = get_tree().get_first_node_in_group("player") as Node2D
 	if player == null:
@@ -75,3 +78,22 @@ func _start_boss_battle() -> void:
 	player.z_index = 20
 
 	boss_battle_started.emit()
+	
+	if DEBUG_BOSS:
+		print("Boss battle started!")
+	_boss_start_effect()
+
+
+func _boss_start_effect() -> void:
+	if player and player.has_method("_shake_camera"):
+		player._shake_camera(12.0, 0.3)
+	
+	var flash := ColorRect.new()
+	flash.color = Color(1, 0.2, 0.2, 0.4)
+	flash.set_anchors_preset(Control.PRESET_FULL_RECT)
+	flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	get_tree().current_scene.add_child(flash)
+	
+	var tween := flash.create_tween()
+	tween.tween_property(flash, "color:a", 0.0, 0.5)
+	tween.tween_callback(flash.queue_free)

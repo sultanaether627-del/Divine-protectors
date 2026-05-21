@@ -186,7 +186,7 @@ texture = ExtResource("2_icon")
 z_index = 10
 position = Vector2(520, 220)
 
-[node name="EnemySpawner" parent="." instance=ExtResource("4_spawner")]
+[node name="EnemySpawner" parent="." groups=["enemy_spawner"] instance=ExtResource("4_spawner")]
 position = Vector2(0, 6)
 spawn_distance = 360.0
 max_enemies = 30
