@@ -16,7 +16,7 @@ signal form_changed(form_name: String)
 @export var healing_per_orb := 5
 @export var bullet_damage := 10.0
 @export var character_revive_time := 60.0
-@export var ult_charge_time := 90.0
+@export var ult_charge_time := 1.0
 
 var pickup_range := 180.0
 var armor := 0.0
