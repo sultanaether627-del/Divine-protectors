@@ -54,26 +54,22 @@ animations = [{
 }]
 
 [sub_resource type="CircleShape2D" id="1_shape"]
-radius = 52.0
+radius = 76.0
 
 [node name="BossFistAttack" type="Area2D"]
-scale = Vector2(0.75, 0.75)
+z_index = 80
+z_as_relative = false
 script = ExtResource("1_script")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+z_index = 1
 texture_filter = 1
-position = Vector2(-7.99999, -3.99999)
-scale = Vector2(1.76389, 1.76389)
+position = Vector2(0, -8)
+scale = Vector2(1.95, 1.95)
 sprite_frames = SubResource("7_frames")
 animation = &"smash"
 autoplay = "smash"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(1.33333, 29.3333)
-shape = SubResource("1_shape")
-
-[node name="BlockBody" type="StaticBody2D" parent="."]
-
-[node name="BlockCollisionShape2D" type="CollisionShape2D" parent="BlockBody"]
-position = Vector2(1.33333, 29.3333)
+position = Vector2(0, 32)
 shape = SubResource("1_shape")

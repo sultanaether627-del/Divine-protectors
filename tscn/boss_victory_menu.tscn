@@ -1,0 +1,44 @@
+[gd_scene load_steps=2 format=3 uid="uid://n41mqwke3svd"]
+
+[ext_resource type="Script" path="res://scripts/boss_victory_menu.gd" id="1_script"]
+
+[node name="BossVictoryMenu" type="CanvasLayer"]
+layer = 120
+script = ExtResource("1_script")
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -155.0
+offset_right = 260.0
+offset_bottom = 155.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TitleLabel" type="Label" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "BOSS DEFEATED"
+horizontal_alignment = 1
+
+[node name="SubTitleLabel" type="Label" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "Continue the fight on the map, or end the season."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="ContinueButton" type="Button" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "Continue the Fight"
+
+[node name="EndSeasonButton" type="Button" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "End the Season"

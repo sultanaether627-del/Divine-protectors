@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3 uid="uid://cx7epc4l7b374"]
 
 [ext_resource type="Script" path="res://scripts/boss_health_bar.gd" id="1_script"]
 
@@ -17,11 +17,9 @@ corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
 [node name="BossHealthBar" type="ProgressBar"]
-anchors_preset = 10
+anchors_preset = -1
 anchor_left = 0.18
-anchor_top = 0.0
 anchor_right = 0.82
-anchor_bottom = 0.0
 offset_top = 90.0
 offset_bottom = 120.0
 theme_override_styles/background = SubResource("1_bg")

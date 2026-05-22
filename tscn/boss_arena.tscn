@@ -1,11 +1,15 @@
-[gd_scene load_steps=8 format=3 uid="uid://bjrsxv6xd7uso"]
+[gd_scene load_steps=12 format=3 uid="uid://bjrsxv6xd7uso"]
 
 [ext_resource type="PackedScene" uid="uid://c6awx0bdhi4jy" path="res://tscn/boss.tscn" id="1_boss"]
 [ext_resource type="PackedScene" uid="uid://do5udaveyommk" path="res://tscn/enemy_spawner.tscn" id="2_spawner"]
-[ext_resource type="PackedScene" path="res://tscn/boss_health_bar.tscn" id="3_boss_hp"]
+[ext_resource type="PackedScene" uid="uid://cx7epc4l7b374" path="res://tscn/boss_health_bar.tscn" id="3_boss_hp"]
+[ext_resource type="Script" path="res://scripts/boss_arena.gd" id="4_arena_script"]
+[ext_resource type="PackedScene" uid="uid://123cf2uuuqsw" path="res://tscn/player_controller.tscn" id="5_player"]
+[ext_resource type="PackedScene" uid="uid://c2ere6ik3qy0o" path="res://tscn/game_ui.tscn" id="6_ui"]
+[ext_resource type="PackedScene" uid="uid://n41mqwke3svd" path="res://tscn/boss_victory_menu.tscn" id="7_victory"]
 
 [sub_resource type="Gradient" id="3_gradient"]
-colors = PackedColorArray(0.1, 0.1, 0.1, 1, 0.22, 0.22, 0.22, 1)
+colors = PackedColorArray(0.08, 0.08, 0.08, 1, 0.22, 0.22, 0.22, 1)
 
 [sub_resource type="GradientTexture2D" id="4_floor_texture"]
 gradient = SubResource("3_gradient")
@@ -13,16 +17,16 @@ width = 1280
 height = 720
 
 [sub_resource type="RectangleShape2D" id="1_wall_h"]
-size = Vector2(1280, 48)
+size = Vector2(1280, 64)
 
 [sub_resource type="RectangleShape2D" id="2_wall_v"]
-size = Vector2(48, 720)
+size = Vector2(64, 720)
 
 [node name="BossArena" type="Node2D"]
+script = ExtResource("4_arena_script")
 
 [node name="Floor" type="Sprite2D" parent="."]
-visible = false
-z_index = -200
+z_index = -300
 position = Vector2(640, 360)
 texture = SubResource("4_floor_texture")
 
@@ -51,21 +55,27 @@ position = Vector2(1280, 360)
 shape = SubResource("2_wall_v")
 
 [node name="PlayerSpawn" type="Marker2D" parent="."]
-position = Vector2(640, 505)
+position = Vector2(640, 535)
+
+[node name="PlayerController" parent="." instance=ExtResource("5_player")]
+z_index = 20
+position = Vector2(640, 535)
 
 [node name="Boss" parent="." instance=ExtResource("1_boss")]
-z_index = 5
-position = Vector2(640, 145)
+z_index = 8
+position = Vector2(579, 92)
 
-[node name="BossEnemySpawner" parent="." instance=ExtResource("2_spawner")]
+[node name="BossEnemySpawner" parent="." groups=["enemy_spawner"] instance=ExtResource("2_spawner")]
 spawn_distance = 380.0
 max_enemies = 30
-clamp_spawn_to_rect = true
-spawn_rect_min = Vector2(90, 120)
-spawn_rect_max = Vector2(1190, 660)
+spawn_rect_min = Vector2(96, 110)
+spawn_rect_max = Vector2(1184, 650)
+
+[node name="GameUI" parent="." instance=ExtResource("6_ui")]
 
 [node name="BossCanvas" type="CanvasLayer" parent="."]
 layer = 20
 
 [node name="BossHealthBar" parent="BossCanvas" instance=ExtResource("3_boss_hp")]
-anchors_preset = -1
+
+[node name="BossVictoryMenu" parent="." instance=ExtResource("7_victory")]
