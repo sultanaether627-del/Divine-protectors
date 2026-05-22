@@ -16,22 +16,22 @@ const DEBUG_SPAWN := false
 @export var spawn_immediately: bool = true
 @export var disabled: bool = false
 
-# KEEP THIS ON so enemies cannot spawn outside your arena.
+
 @export var clamp_spawn_to_rect: bool = true
 
-# CHANGE THESE IN THE INSPECTOR TO MATCH YOUR MAP.
-# Put the values INSIDE the wall border, not outside.
-@export var spawn_rect_min: Vector2 = Vector2(-2500, -900)
-@export var spawn_rect_max: Vector2 = Vector2(2500, 900)
+
+
+@export var spawn_rect_min: Vector2 = Vector2(-1900, -1400)
+@export var spawn_rect_max: Vector2 = Vector2(1900, 1400)
 
 # Safety space from the walls.
 @export var spawn_margin: float = 64.0
 
-# Fast enemies start appearing after 2 minutes.
+
 @export var fast_enemy_unlock_time: float = 120.0
 @export var fast_enemy_spawn_chance: float = 0.35
 
-# Tank enemies start appearing after 2.5 minutes.
+
 @export var tank_enemy_unlock_time: float = 150.0
 @export var tank_enemy_spawn_chance: float = 0.20
 
@@ -151,7 +151,7 @@ func _get_spawn_position() -> Vector2:
 	var top: float = min(spawn_rect_min.y, spawn_rect_max.y) + spawn_margin
 	var bottom: float = max(spawn_rect_min.y, spawn_rect_max.y) - spawn_margin
 
-	# Try to spawn around the player, but only if the position is inside the map.
+	
 	for i in range(40):
 		var angle: float = randf_range(0.0, TAU)
 		var spawn_offset: Vector2 = Vector2(cos(angle), sin(angle)) * spawn_distance
@@ -160,7 +160,7 @@ func _get_spawn_position() -> Vector2:
 		if spawn_pos.x >= left and spawn_pos.x <= right and spawn_pos.y >= top and spawn_pos.y <= bottom:
 			return spawn_pos
 
-	# Backup: if it cannot spawn around the player, spawn anywhere inside the map.
+	
 	return Vector2(
 		randf_range(left, right),
 		randf_range(top, bottom)

@@ -463,9 +463,9 @@ func cast_ult() -> void:
 
 	var ult = ult_scene.instantiate()
 
-	# Set the position BEFORE adding it to the scene.
-	# Godot runs _ready() as soon as the node enters the tree,
-	# so setting this after add_child() makes the ult effect apply at (0, 0).
+	
+	
+	
 	ult.global_position = global_position + Vector2(0, 26)
 	ult.z_index = -50
 
