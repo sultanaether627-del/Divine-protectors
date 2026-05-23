@@ -16,18 +16,7 @@ signal form_changed(form_name: String)
 @export var healing_per_orb := 5
 @export var bullet_damage := 10.0
 @export var character_revive_time := 60.0
-<<<<<<< HEAD
 @export var ult_charge_time := 90.0
-@export var shoot_sound: AudioStream = preload("res://audio/sfx/player/magical_1.ogg")
-
-# Ultimate sound effects using available resources
-@export var water_ult_sound: AudioStream = preload("res://audio/sfx/player/yodguard-healing-magic-6-378666.mp3")
-@export var fire_ult_sound: AudioStream = preload("res://audio/sfx/player/rescopicsound-elemental-magic-spell-impact-outgoing-228342.mp3")
-@export var earth_ult_sound: AudioStream = preload("res://audio/sfx/player/rescopicsound-elemental-magic-spell-impact-outgoing-228342.mp3")
-@export var wind_ult_sound: AudioStream = preload("res://audio/sfx/player/rescopicsound-elemental-magic-spell-impact-outgoing-228342.mp3")
-=======
-@export var ult_charge_time := 1.0
->>>>>>> 018d298ad5fb11dfce127b249b5eca0f6dee11ef
 
 var pickup_range := 180.0
 var armor := 0.0
@@ -48,6 +37,9 @@ var xp_multiplier := 1.0
 
 @onready var forms_root: Node2D = $FormsRoot
 
+@export var swap_effect_scene: PackedScene = preload("res://tscn/swap_effect.tscn")
+@export var floating_text_scene: PackedScene = preload("res://tscn/floating_text.tscn")
+
 var can_shoot := true
 var level := 1
 var current_xp := 0
@@ -60,6 +52,13 @@ var ult_scenes: Dictionary = {}
 var form_stats: Dictionary = {}
 var active_form_key := "water"
 var active_form: Node = null
+
+var element_colors := {
+	"water": Color(0.35, 0.75, 1.0, 1.0),
+	"fire": Color(1.0, 0.35, 0.15, 1.0),
+	"earth": Color(0.55, 0.35, 0.16, 1.0),
+	"wind": Color(0.55, 1.0, 0.65, 1.0)
+}
 
 
 func _ready() -> void:
@@ -208,28 +207,8 @@ func shooting() -> void:
 		bullet.speed_mult = projectile_speed_mult
 		bullet.size_mult = projectile_size_mult
 
-	_play_shoot_sound()
-	
-	
-
-	
-
 	await get_tree().create_timer(shoot_cooldown).timeout
 	can_shoot = true
-
-
-func _play_shoot_sound() -> void:
-	if shoot_sound == null:
-		return
-
-	var audio_player: AudioStreamPlayer = AudioStreamPlayer.new()
-	audio_player.stream = shoot_sound
-	audio_player.volume_db = -14.0
-	audio_player.pitch_scale = 1.0 + randf_range(-0.1, 0.1)
-
-	get_tree().current_scene.add_child(audio_player)
-	audio_player.play()
-	audio_player.finished.connect(audio_player.queue_free)
 
 
 func switch_form(form_key: String, force := false) -> void:
@@ -238,11 +217,13 @@ func switch_form(form_key: String, force := false) -> void:
 	if form_key == active_form_key and not force:
 		return
 	if form_stats.has(form_key) and bool(form_stats[form_key]["dead"]):
+		_spawn_floating_text("%s DOWN" % str(form_stats[form_key]["display"]), Color(1.0, 0.25, 0.25, 1.0), global_position + Vector2(0, -70))
 		if DEBUG_COMBAT:
 			print(form_stats[form_key]["display"], " is knocked out. Revive left: ", int(ceil(float(form_stats[form_key]["revive_left"]))), "s")
 		return
 
 	if active_form:
+		_play_swap_effect(active_form_key)
 		active_form.queue_free()
 		active_form = null
 
@@ -251,7 +232,9 @@ func switch_form(form_key: String, force := false) -> void:
 	forms_root.add_child(active_form)
 	active_form.position = Vector2.ZERO
 
-	_play_form_switch_sound()
+	_play_swap_effect(active_form_key)
+	_spawn_floating_text(str(form_stats[active_form_key]["display"]), element_colors.get(active_form_key, Color.WHITE), global_position + Vector2(0, -78))
+
 	_emit_health()
 	form_changed.emit(form_stats[active_form_key]["display"])
 	if DEBUG_COMBAT:
@@ -270,7 +253,6 @@ func take_damage(amount: int) -> void:
 	form_stats[active_form_key]["health"] = int(clamp(int(form_stats[active_form_key]["health"]) - reduced, 0, int(form_stats[active_form_key]["max_health"])))
 	_emit_health()
 	
-	_play_hit_sound()
 	_shake_camera(4.0, 0.08)
 	
 	if DEBUG_COMBAT:
@@ -450,7 +432,7 @@ func _shake_camera(strength: float, duration: float) -> void:
 
 
 func _level_up_effect() -> void:
-	_play_level_up_sound()
+	_spawn_floating_text("LEVEL UP!", Color(1.0, 0.88, 0.25, 1.0), global_position + Vector2(0, -90))
 	if active_form and active_form.has_node("AnimatedSprite2D"):
 		var s: AnimatedSprite2D = active_form.get_node("AnimatedSprite2D")
 		var tween := create_tween()
@@ -462,6 +444,26 @@ func _level_up_effect() -> void:
 		tween.tween_property(s, "scale", Vector2(1, 1), 0.2)
 	
 	_shake_camera(2.0, 0.06)
+
+
+
+func _play_swap_effect(form_key: String) -> void:
+	if swap_effect_scene == null:
+		return
+	var effect = swap_effect_scene.instantiate()
+	get_tree().current_scene.add_child(effect)
+	effect.global_position = global_position + Vector2(0, -14)
+	effect.element_color = element_colors.get(form_key, Color.WHITE)
+
+
+func _spawn_floating_text(text: String, color: Color, world_position: Vector2) -> void:
+	if floating_text_scene == null:
+		return
+	var popup = floating_text_scene.instantiate()
+	get_tree().current_scene.add_child(popup)
+	popup.global_position = world_position
+	popup.text = text
+	popup.color = color
 
 
 func _update_active_ult_charge(delta: float) -> void:
@@ -488,6 +490,12 @@ func cast_ult() -> void:
 		if DEBUG_COMBAT:
 			print(form_stats[active_form_key]["display"], " ult is not ready yet.")
 		return
+
+	if active_form_key == "wind":
+		_cast_wind_dash_ult()
+		_reset_active_ult()
+		return
+
 	if not ult_scenes.has(active_form_key):
 		return
 
@@ -495,21 +503,79 @@ func cast_ult() -> void:
 	if ult_scene == null:
 		return
 
-	_play_ult_sound()
 	var ult = ult_scene.instantiate()
-
-	
-	
-	
 	ult.global_position = global_position + Vector2(0, 26)
-	ult.z_index = -50
+	ult.z_index = -2
+	ult.z_as_relative = false
 
 	get_tree().current_scene.add_child(ult)
 
-	form_stats[active_form_key]["ult_charge"] = 0.0
-	form_stats[active_form_key]["ult_ready"] = false
+	_reset_active_ult()
 	if DEBUG_COMBAT:
 		print("CAST ULT: ", form_stats[active_form_key]["display"])
+
+
+func _reset_active_ult() -> void:
+	form_stats[active_form_key]["ult_charge"] = 0.0
+	form_stats[active_form_key]["ult_ready"] = false
+
+
+func _cast_wind_dash_ult() -> void:
+	var aim_dir: Vector2 = global_position.direction_to(get_global_mouse_position())
+	if aim_dir.length() <= 0.01:
+		aim_dir = Vector2.RIGHT
+
+	var dash_distance: float = 650.0
+	var dash_width: float = 120.0
+	var start_pos: Vector2 = global_position
+	var end_pos: Vector2 = start_pos + aim_dir.normalized() * dash_distance
+
+	_kill_enemies_along_dash(start_pos, end_pos, dash_width)
+
+	var tween := create_tween()
+	tween.tween_property(self, "global_position", end_pos, 0.18).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	_play_wind_dash_fx(start_pos, end_pos)
+
+
+func _kill_enemies_along_dash(start_pos: Vector2, end_pos: Vector2, width: float) -> void:
+	var dash_vec: Vector2 = end_pos - start_pos
+	var dash_len: float = dash_vec.length()
+	if dash_len <= 0.01:
+		return
+
+	var dash_dir: Vector2 = dash_vec.normalized()
+
+	for enemy in get_tree().get_nodes_in_group("enemy"):
+		if enemy == null or not is_instance_valid(enemy) or not (enemy is Node2D):
+			continue
+
+		var enemy_node: Node2D = enemy as Node2D
+		var enemy_pos: Vector2 = enemy_node.global_position
+		var projection: float = clampf((enemy_pos - start_pos).dot(dash_dir), 0.0, dash_len)
+		var closest: Vector2 = start_pos + dash_dir * projection
+		var distance: float = enemy_pos.distance_to(closest)
+
+		if distance <= width:
+			if enemy.has_method("kill_without_xp"):
+				enemy.kill_without_xp()
+			elif enemy.has_method("die"):
+				enemy.die()
+
+
+func _play_wind_dash_fx(start_pos: Vector2, end_pos: Vector2) -> void:
+	var line := Line2D.new()
+	line.width = 12.0
+	line.default_color = Color(0.55, 1.0, 0.65, 0.75)
+	line.z_index = 120
+	line.z_as_relative = false
+	line.add_point(start_pos)
+	line.add_point(end_pos)
+	get_tree().current_scene.add_child(line)
+
+	var tween := create_tween()
+	tween.tween_property(line, "modulate:a", 0.0, 0.28)
+	tween.tween_callback(Callable(line, "queue_free"))
 
 
 func apply_water_ult() -> void:
@@ -523,46 +589,3 @@ func apply_water_ult() -> void:
 	_emit_health()
 	if DEBUG_COMBAT:
 		print("Water ult: all characters fully healed and revived.")
-
-
-func _play_form_switch_sound() -> void:
-	var sfx_manager = get_node_or_null("/root/SFXManager")
-	if sfx_manager and sfx_manager.has_method("play_form_switch"):
-		sfx_manager.play_form_switch()
-
-
-func _play_ult_sound() -> void:
-	var ult_sound: AudioStream = null
-	
-	match active_form_key:
-		"water":
-			ult_sound = water_ult_sound
-		"fire":
-			ult_sound = fire_ult_sound
-		"earth":
-			ult_sound = earth_ult_sound
-		"wind":
-			ult_sound = wind_ult_sound
-	
-	if ult_sound == null:
-		return
-	
-	var audio_player = AudioStreamPlayer.new()
-	audio_player.stream = ult_sound
-	audio_player.volume_db = 0.0
-	audio_player.pitch_scale = 1.0
-	
-	get_tree().current_scene.add_child(audio_player)
-	audio_player.play()
-
-
-func _play_hit_sound() -> void:
-	var sfx_manager = get_node_or_null("/root/SFXManager")
-	if sfx_manager and sfx_manager.has_method("play_player_hit"):
-		sfx_manager.play_player_hit()
-
-
-func _play_level_up_sound() -> void:
-	var sfx_manager = get_node_or_null("/root/SFXManager")
-	if sfx_manager and sfx_manager.has_method("play_level_up"):
-		sfx_manager.play_level_up()

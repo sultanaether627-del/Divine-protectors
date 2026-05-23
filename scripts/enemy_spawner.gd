@@ -7,14 +7,19 @@ const DEBUG_SPAWN := false
 @export var tank_enemy_scene: PackedScene = preload("res://tscn/enemy_tank.tscn")
 
 @export var starting_spawn_time: float = 1.0
-@export var minimum_spawn_time: float = 0.18
-@export var spawn_time_decrease: float = 0.08
-@export var difficulty_increase_interval: float = 6.0
+@export var minimum_spawn_time: float = 0.14
+@export var spawn_time_decrease: float = 0.105
+@export var difficulty_increase_interval: float = 5.0
 
 @export var spawn_distance: float = 420.0
 @export var max_enemies: int = 100
 @export var spawn_immediately: bool = true
 @export var disabled: bool = false
+
+@export var enemy_health_growth_per_minute: float = 0.12
+@export var enemy_damage_growth_per_minute: float = 0.06
+@export var enemy_speed_growth_per_minute: float = 0.035
+@export var max_enemy_health_multiplier: float = 4.0
 
 
 @export var clamp_spawn_to_rect: bool = true
@@ -116,11 +121,29 @@ func spawn_enemy() -> void:
 		return
 
 	enemy.process_mode = Node.PROCESS_MODE_PAUSABLE
+	_apply_enemy_scaling(enemy)
 
 	get_tree().current_scene.add_child(enemy)
 
 	var spawn_pos: Vector2 = _get_spawn_position()
 	enemy.global_position = spawn_pos
+
+
+
+func _apply_enemy_scaling(enemy: Node) -> void:
+	var minutes_alive: float = elapsed_game_time / 60.0
+	var health_mult: float = min(max_enemy_health_multiplier, 1.0 + minutes_alive * enemy_health_growth_per_minute)
+	var damage_mult: float = 1.0 + minutes_alive * enemy_damage_growth_per_minute
+	var speed_mult: float = 1.0 + minutes_alive * enemy_speed_growth_per_minute
+
+	if enemy.get("max_health") != null:
+		enemy.set("max_health", float(enemy.get("max_health")) * health_mult)
+	if enemy.get("health") != null:
+		enemy.set("health", float(enemy.get("max_health")))
+	if enemy.get("damage") != null:
+		enemy.set("damage", int(ceil(float(enemy.get("damage")) * damage_mult)))
+	if enemy.get("movement_speed") != null:
+		enemy.set("movement_speed", float(enemy.get("movement_speed")) * speed_mult)
 
 
 func _choose_enemy_scene() -> PackedScene:

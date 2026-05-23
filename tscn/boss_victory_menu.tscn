@@ -1,10 +1,67 @@
-[gd_scene load_steps=2 format=3 uid="uid://n41mqwke3svd"]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/boss_victory_menu.gd" id="1_script"]
 
+[sub_resource type="StyleBoxFlat" id="PanelStyle"]
+bg_color = Color(0.018, 0.024, 0.04, 0.94)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.55, 0.68, 0.85, 0.28)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.55)
+shadow_size = 16
+content_margin_left = 26
+content_margin_top = 22
+content_margin_right = 26
+content_margin_bottom = 22
+
+[sub_resource type="StyleBoxFlat" id="ButtonNormal"]
+bg_color = Color(0.04, 0.05, 0.08, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.9, 0.95, 1, 0.18)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+content_margin_left = 14
+content_margin_top = 8
+content_margin_right = 14
+content_margin_bottom = 8
+
+[sub_resource type="StyleBoxFlat" id="ButtonHover"]
+bg_color = Color(0.08, 0.1, 0.15, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.95, 0.82, 0.25, 0.75)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+content_margin_left = 14
+content_margin_top = 8
+content_margin_right = 14
+content_margin_bottom = 8
+
 [node name="BossVictoryMenu" type="CanvasLayer"]
-layer = 120
+visible = false
+layer = 80
 script = ExtResource("1_script")
+
+[node name="Dim" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.58)
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
 anchors_preset = 8
@@ -12,33 +69,47 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -260.0
-offset_top = -155.0
-offset_right = 260.0
-offset_bottom = 155.0
+offset_left = -290.0
+offset_top = -180.0
+offset_right = 290.0
+offset_bottom = 180.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/panel = SubResource("PanelStyle")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 14
+alignment = 1
 
 [node name="TitleLabel" type="Label" parent="PanelContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 30
+theme_override_font_sizes/font_size = 34
 text = "BOSS DEFEATED"
 horizontal_alignment = 1
 
 [node name="SubTitleLabel" type="Label" parent="PanelContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 16
+modulate = Color(0.85, 0.9, 1, 0.86)
 text = "Continue the fight on the map, or end the season."
 horizontal_alignment = 1
 autowrap_mode = 2
 
 [node name="ContinueButton" type="Button" parent="PanelContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
-text = "Continue the Fight"
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("ButtonNormal")
+theme_override_styles/hover = SubResource("ButtonHover")
+theme_override_styles/pressed = SubResource("ButtonHover")
+text = "CONTINUE THE FIGHT"
 
 [node name="EndSeasonButton" type="Button" parent="PanelContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
-text = "End the Season"
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("ButtonNormal")
+theme_override_styles/hover = SubResource("ButtonHover")
+theme_override_styles/pressed = SubResource("ButtonHover")
+text = "END THE SEASON"

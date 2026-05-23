@@ -1,36 +1,28 @@
-[gd_scene load_steps=8 format=3 uid="uid://c2ere6ik3qy0o"]
+[gd_scene load_steps=7 format=3 uid="uid://c2ere6ik3qy0o"]
 
-[ext_resource type="PackedScene" path="res://tscn/health_bar.tscn" id="1_health"]
-[ext_resource type="PackedScene" path="res://tscn/xp_bar.tscn" id="2_xp"]
-[ext_resource type="PackedScene" path="res://tscn/upgrade_panel.tscn" id="3_upgrade"]
-[ext_resource type="PackedScene" path="res://tscn/party_ui.tscn" id="4_party"]
-[ext_resource type="Script" path="res://scripts/boss_timer_label.gd" id="5_boss_timer_label"]
-[ext_resource type="PackedScene" path="res://tscn/pause_menu.tscn" id="6_pause"]
-[ext_resource type="PackedScene" path="res://tscn/game_over.tscn" id="7_gameover"]
+[ext_resource type="PackedScene" path="res://tscn/upgrade_panel.tscn" id="1_upgrade"]
+[ext_resource type="Script" path="res://scripts/boss_timer_label.gd" id="2_boss_timer_label"]
+[ext_resource type="PackedScene" path="res://tscn/pause_menu.tscn" id="3_pause"]
+[ext_resource type="PackedScene" path="res://tscn/game_over.tscn" id="4_gameover"]
+[ext_resource type="PackedScene" path="res://tscn/bottom_hud.tscn" id="5_bottom"]
 
 [node name="GameUI" type="CanvasLayer"]
 layer = 10
 
-[node name="HealthBar" parent="." instance=ExtResource("1_health")]
-anchors_preset = -1
-
-[node name="XPBar" parent="." instance=ExtResource("2_xp")]
-anchors_preset = -1
-
-[node name="UpgradePanel" parent="." instance=ExtResource("3_upgrade")]
-
-[node name="PartyUI" parent="." instance=ExtResource("4_party")]
+[node name="BottomHUD" parent="." instance=ExtResource("5_bottom")]
 
 [node name="BossTimerLabel" type="Label" parent="."]
-anchors_preset = -1
-anchor_left = 0.42
-anchor_right = 0.58
-offset_top = 82.0
-offset_bottom = 112.0
-text = "Boss in 15:00"
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 12.0
+offset_bottom = 34.0
+theme_override_font_sizes/font_size = 15
+text = "BOSS IN 15:00"
 horizontal_alignment = 1
-script = ExtResource("5_boss_timer_label")
+script = ExtResource("2_boss_timer_label")
 
-[node name="PauseMenu" parent="." instance=ExtResource("6_pause")]
+[node name="UpgradePanel" parent="." instance=ExtResource("1_upgrade")]
 
-[node name="GameOver" parent="." instance=ExtResource("7_gameover")]
+[node name="PauseMenu" parent="." instance=ExtResource("3_pause")]
+
+[node name="GameOver" parent="." instance=ExtResource("4_gameover")]

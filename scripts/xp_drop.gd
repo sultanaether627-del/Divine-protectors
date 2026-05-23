@@ -16,6 +16,10 @@ var collected := false
 
 
 func _ready() -> void:
+	add_to_group("xp_drop")
+	collision_layer = 0
+	collision_mask = 1
+	monitorable = false
 	body_entered.connect(_on_body_entered)
 
 	await get_tree().process_frame

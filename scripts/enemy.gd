@@ -10,6 +10,7 @@ const DEBUG_COMBAT := false
 @export var separation_strength := 60.0
 @export var xp_drop_scene: PackedScene = preload("res://tscn/xp_drop.tscn")
 @export var xp_drops_on_death := 1
+@export var floating_text_scene: PackedScene = preload("res://tscn/floating_text.tscn")
 
 @onready var player = get_tree().get_first_node_in_group("player")
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
@@ -32,6 +33,7 @@ func _ready() -> void:
 	health = max_health
 	if sprite.sprite_frames and sprite.sprite_frames.has_animation("move"):
 		sprite.play("move")
+	_enemy_spawn_polish()
 
 
 func _physics_process(_delta: float) -> void:
@@ -104,6 +106,7 @@ func take_damage(amount: float) -> void:
 		return
 
 	health -= amount
+	_spawn_damage_text(amount)
 	
 	_flash_hit()
 	
@@ -133,7 +136,6 @@ func kill_without_xp() -> void:
 
 
 func _safe_die() -> void:
-	_play_death_sound()
 	_death_effect()
 	await get_tree().create_timer(0.15).timeout
 	
@@ -172,12 +174,6 @@ func apply_push_from(origin: Vector2, push_distance: float) -> void:
 	global_position += push_dir.normalized() * push_distance
 
 
-func _play_death_sound() -> void:
-	var sfx_manager = get_node_or_null("/root/SFXManager")
-	if sfx_manager and sfx_manager.has_method("play_enemy_death"):
-		sfx_manager.play_enemy_death()
-
-
 func stun(duration: float) -> void:
 	if is_dead:
 		return
@@ -211,3 +207,25 @@ func stun(duration: float) -> void:
 	if sprite:
 		sprite.speed_scale = 1.0
 		sprite.modulate = Color(1.0, 1.0, 1.0, 1.0)
+
+
+
+func _enemy_spawn_polish() -> void:
+	if sprite:
+		var original_scale := sprite.scale
+		sprite.scale = original_scale * 0.75
+		sprite.modulate.a = 0.35
+		var tween := create_tween()
+		tween.set_parallel(true)
+		tween.tween_property(sprite, "scale", original_scale, 0.2).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tween.tween_property(sprite, "modulate:a", 1.0, 0.18)
+
+
+func _spawn_damage_text(amount: float) -> void:
+	if floating_text_scene == null:
+		return
+	var popup = floating_text_scene.instantiate()
+	get_tree().current_scene.add_child(popup)
+	popup.global_position = global_position + Vector2(randf_range(-10, 10), -42)
+	popup.text = "-%d" % int(ceil(amount))
+	popup.color = Color(1.0, 0.35, 0.2, 1.0)

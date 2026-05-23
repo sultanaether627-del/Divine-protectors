@@ -1,21 +1,21 @@
 extends Node
 
-const MENU_TRACKS: Array = [
-	preload("res://audio/music/gamelan_loop.mp3")
+const MENU_TRACK_PATHS: Array[String] = [
+	"res://audio/music/gamelan_loop.mp3"
 ]
 
-const WORLD_TRACKS: Array = [
-	preload("res://audio/music/thai_loop.mp3"),
-	preload("res://audio/music/sunda_loop.mp3"),
-	preload("res://audio/music/filipino_loop.mp3")
+const WORLD_TRACK_PATHS: Array[String] = [
+	"res://audio/music/thai_loop.mp3",
+	"res://audio/music/sunda_loop.mp3",
+	"res://audio/music/filipino_loop.mp3"
 ]
 
-const BOSS_TRACKS: Array = [
-	preload("res://audio/music/cambodian_loop.mp3")
+const BOSS_TRACK_PATHS: Array[String] = [
+	"res://audio/music/cambodian_loop.mp3"
 ]
 
-const END_TRACKS: Array = [
-	preload("res://audio/music/gamelan_loop.mp3")
+const END_TRACK_PATHS: Array[String] = [
+	"res://audio/music/gamelan_loop.mp3"
 ]
 
 @export var volume_db: float = -9.0
@@ -75,15 +75,25 @@ func _get_music_group(scene_path: String) -> String:
 
 
 func _get_tracks_for_group(group_name: String) -> Array:
+	var paths: Array[String] = MENU_TRACK_PATHS
+
 	match group_name:
 		"boss":
-			return BOSS_TRACKS
+			paths = BOSS_TRACK_PATHS
 		"world":
-			return WORLD_TRACKS
+			paths = WORLD_TRACK_PATHS
 		"end":
-			return END_TRACKS
+			paths = END_TRACK_PATHS
 		_:
-			return MENU_TRACKS
+			paths = MENU_TRACK_PATHS
+
+	var tracks: Array = []
+	for path in paths:
+		if ResourceLoader.exists(path):
+			var stream := load(path)
+			if stream:
+				tracks.append(stream)
+	return tracks
 
 
 func _play_random_track(tracks: Array) -> void:
