@@ -2,6 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://123cf2uuuqsw" path="res://tscn/player_controller.tscn" id="1_player"]
 [ext_resource type="Texture2D" uid="uid://cijr8lxalvuws" path="res://sprites/icon.svg" id="2_icon"]
+<<<<<<< Updated upstream
 [ext_resource type="PackedScene" uid="uid://cmtelk2prtbkg" path="res://tscn/enemy.tscn" id="3_enemy"]
 [ext_resource type="PackedScene" uid="uid://do5udaveyommk" path="res://tscn/enemy_spawner.tscn" id="4_spawner"]
 [ext_resource type="PackedScene" uid="uid://c2ere6ik3qy0o" path="res://tscn/game_ui.tscn" id="5_ui"]
@@ -104,6 +105,11 @@ texture = ExtResource("7_8txwh")
 
 [sub_resource type="TileSet" id="TileSet_nakng"]
 sources/0 = SubResource("TileSetAtlasSource_2fn2x")
+=======
+[ext_resource type="PackedScene" uid="uid://caifoks8ssxo6" path="res://tscn/enemy.tscn" id="3_enemy"]
+[ext_resource type="PackedScene" uid="uid://do5udaveyommk" path="res://tscn/enemy_spawner.tscn" id="4_spawner"]
+[ext_resource type="PackedScene" uid="uid://2nmijnie5jmv" path="res://tscn/game_ui.tscn" id="5_ui"]
+>>>>>>> Stashed changes
 
 [node name="World" type="Node2D"]
 script = ExtResource("6_boss_timer")
