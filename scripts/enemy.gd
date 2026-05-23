@@ -133,6 +133,7 @@ func kill_without_xp() -> void:
 
 
 func _safe_die() -> void:
+	_play_death_sound()
 	_death_effect()
 	await get_tree().create_timer(0.15).timeout
 	
@@ -169,6 +170,12 @@ func apply_push_from(origin: Vector2, push_distance: float) -> void:
 		push_dir = Vector2.RIGHT.rotated(randf_range(0.0, TAU))
 
 	global_position += push_dir.normalized() * push_distance
+
+
+func _play_death_sound() -> void:
+	var sfx_manager = get_node_or_null("/root/SFXManager")
+	if sfx_manager and sfx_manager.has_method("play_enemy_death"):
+		sfx_manager.play_enemy_death()
 
 
 func stun(duration: float) -> void:

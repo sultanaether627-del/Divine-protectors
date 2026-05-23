@@ -140,6 +140,7 @@ func _try_damage_target(node: Node) -> bool:
 
 	has_hit = true
 	target.take_damage(damage)
+	_play_hit_sound()
 	if DEBUG_COMBAT:
 		print("Bullet hit ", target.name, " for ", damage, " damage")
 	return true
@@ -161,3 +162,9 @@ func _is_player_related(node: Node) -> bool:
 			return true
 		current = current.get_parent()
 	return false
+
+
+func _play_hit_sound() -> void:
+	var sfx_manager = get_node_or_null("/root/SFXManager")
+	if sfx_manager and sfx_manager.has_method("play_hit"):
+		sfx_manager.play_hit()

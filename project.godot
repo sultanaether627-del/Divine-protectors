@@ -15,6 +15,11 @@ run/main_scene="res://Ui button testing final res/main menu UI.tscn"
 config/features=PackedStringArray("4.3", "Forward Plus")
 config/icon="res://icon.svg"
 
+[autoload]
+
+SFXManager="*res://scripts/sfx_manager.gd"
+MusicManager="*res://scripts/music_manager.gd"
+
 [input]
 
 up={

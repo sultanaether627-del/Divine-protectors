@@ -69,6 +69,7 @@ func _spawn_fist_attack() -> void:
 	if player == null or fist_attack_scene == null:
 		return
 
+	_play_boss_attack_sound()
 	var fist: Node = fist_attack_scene.instantiate()
 	get_tree().current_scene.add_child(fist)
 	fist.global_position = player.global_position
@@ -84,6 +85,7 @@ func take_damage(amount: float) -> void:
 
 	health = maxf(0.0, health - amount)
 	health_changed.emit(health, max_health)
+	_play_boss_hit_sound()
 	_flash_on_hit()
 	if DEBUG_COMBAT:
 		print("Boss HP: ", health)
@@ -96,6 +98,7 @@ func die() -> void:
 	if is_dead:
 		return
 	is_dead = true
+	_play_boss_death_sound()
 	boss_defeated.emit()
 	print("Boss defeated!")
 	queue_free()
@@ -109,3 +112,21 @@ func _flash_on_hit() -> void:
 	sprite.modulate = Color(1.0, 0.25, 0.25, 1.0)
 	hit_flash_tween = create_tween()
 	hit_flash_tween.tween_property(sprite, "modulate", Color(1, 1, 1, 1), 0.12)
+
+
+func _play_boss_attack_sound() -> void:
+	var sfx_manager = get_node_or_null("/root/SFXManager")
+	if sfx_manager and sfx_manager.has_method("play_boss_attack"):
+		sfx_manager.play_boss_attack()
+
+
+func _play_boss_hit_sound() -> void:
+	var sfx_manager = get_node_or_null("/root/SFXManager")
+	if sfx_manager and sfx_manager.has_method("play_boss_hit"):
+		sfx_manager.play_boss_hit()
+
+
+func _play_boss_death_sound() -> void:
+	var sfx_manager = get_node_or_null("/root/SFXManager")
+	if sfx_manager and sfx_manager.has_method("play_boss_death"):
+		sfx_manager.play_boss_death()

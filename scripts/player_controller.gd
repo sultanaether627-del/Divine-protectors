@@ -17,6 +17,13 @@ signal form_changed(form_name: String)
 @export var bullet_damage := 10.0
 @export var character_revive_time := 60.0
 @export var ult_charge_time := 90.0
+@export var shoot_sound: AudioStream = preload("res://audio/sfx/player/magical_1.ogg")
+
+# Ultimate sound effects using available resources
+@export var water_ult_sound: AudioStream = preload("res://audio/sfx/player/yodguard-healing-magic-6-378666.mp3")
+@export var fire_ult_sound: AudioStream = preload("res://audio/sfx/player/rescopicsound-elemental-magic-spell-impact-outgoing-228342.mp3")
+@export var earth_ult_sound: AudioStream = preload("res://audio/sfx/player/rescopicsound-elemental-magic-spell-impact-outgoing-228342.mp3")
+@export var wind_ult_sound: AudioStream = preload("res://audio/sfx/player/rescopicsound-elemental-magic-spell-impact-outgoing-228342.mp3")
 
 var pickup_range := 180.0
 var armor := 0.0
@@ -197,8 +204,28 @@ func shooting() -> void:
 		bullet.speed_mult = projectile_speed_mult
 		bullet.size_mult = projectile_size_mult
 
+	_play_shoot_sound()
+	
+	
+
+	
+
 	await get_tree().create_timer(shoot_cooldown).timeout
 	can_shoot = true
+
+
+func _play_shoot_sound() -> void:
+	if shoot_sound == null:
+		return
+
+	var audio_player: AudioStreamPlayer = AudioStreamPlayer.new()
+	audio_player.stream = shoot_sound
+	audio_player.volume_db = -14.0
+	audio_player.pitch_scale = 1.0 + randf_range(-0.1, 0.1)
+
+	get_tree().current_scene.add_child(audio_player)
+	audio_player.play()
+	audio_player.finished.connect(audio_player.queue_free)
 
 
 func switch_form(form_key: String, force := false) -> void:
@@ -220,6 +247,7 @@ func switch_form(form_key: String, force := false) -> void:
 	forms_root.add_child(active_form)
 	active_form.position = Vector2.ZERO
 
+	_play_form_switch_sound()
 	_emit_health()
 	form_changed.emit(form_stats[active_form_key]["display"])
 	if DEBUG_COMBAT:
@@ -238,6 +266,7 @@ func take_damage(amount: int) -> void:
 	form_stats[active_form_key]["health"] = int(clamp(int(form_stats[active_form_key]["health"]) - reduced, 0, int(form_stats[active_form_key]["max_health"])))
 	_emit_health()
 	
+	_play_hit_sound()
 	_shake_camera(4.0, 0.08)
 	
 	if DEBUG_COMBAT:
@@ -417,6 +446,7 @@ func _shake_camera(strength: float, duration: float) -> void:
 
 
 func _level_up_effect() -> void:
+	_play_level_up_sound()
 	if active_form and active_form.has_node("AnimatedSprite2D"):
 		var s: AnimatedSprite2D = active_form.get_node("AnimatedSprite2D")
 		var tween := create_tween()
@@ -461,6 +491,7 @@ func cast_ult() -> void:
 	if ult_scene == null:
 		return
 
+	_play_ult_sound()
 	var ult = ult_scene.instantiate()
 
 	
@@ -488,3 +519,46 @@ func apply_water_ult() -> void:
 	_emit_health()
 	if DEBUG_COMBAT:
 		print("Water ult: all characters fully healed and revived.")
+
+
+func _play_form_switch_sound() -> void:
+	var sfx_manager = get_node_or_null("/root/SFXManager")
+	if sfx_manager and sfx_manager.has_method("play_form_switch"):
+		sfx_manager.play_form_switch()
+
+
+func _play_ult_sound() -> void:
+	var ult_sound: AudioStream = null
+	
+	match active_form_key:
+		"water":
+			ult_sound = water_ult_sound
+		"fire":
+			ult_sound = fire_ult_sound
+		"earth":
+			ult_sound = earth_ult_sound
+		"wind":
+			ult_sound = wind_ult_sound
+	
+	if ult_sound == null:
+		return
+	
+	var audio_player = AudioStreamPlayer.new()
+	audio_player.stream = ult_sound
+	audio_player.volume_db = 0.0
+	audio_player.pitch_scale = 1.0
+	
+	get_tree().current_scene.add_child(audio_player)
+	audio_player.play()
+
+
+func _play_hit_sound() -> void:
+	var sfx_manager = get_node_or_null("/root/SFXManager")
+	if sfx_manager and sfx_manager.has_method("play_player_hit"):
+		sfx_manager.play_player_hit()
+
+
+func _play_level_up_sound() -> void:
+	var sfx_manager = get_node_or_null("/root/SFXManager")
+	if sfx_manager and sfx_manager.has_method("play_level_up"):
+		sfx_manager.play_level_up()
