@@ -28,9 +28,9 @@ var last_active_key: String = ""
 var last_ready_state: bool = false
 
 var icon_textures: Dictionary = {
-	"water": preload("res://sprites/icons/water_icon.png"),
-	"fire": preload("res://sprites/icons/fire_icon.png"),
-	"earth": preload("res://sprites/icons/earth_icon.png"),
+	"water": preload("res://sprites/icons/earth_icon.png"),
+	"fire": preload("res://sprites/icons/water_icon.png"),
+	"earth": preload("res://sprites/icons/fire_icon.png"),
 	"wind": preload("res://sprites/icons/wind_icon.png")
 }
 
