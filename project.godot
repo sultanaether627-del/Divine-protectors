@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Divine Protectors UI"
-run/main_scene="res://Ui button testing final res/main menu UI.tscn"
+run/main_scene="res://tscn/world.tscn"
 config/features=PackedStringArray("4.3", "Forward Plus")
 config/icon="res://icon.svg"
 
