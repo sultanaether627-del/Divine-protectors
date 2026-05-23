@@ -16,6 +16,7 @@ signal form_changed(form_name: String)
 @export var healing_per_orb := 5
 @export var bullet_damage := 10.0
 @export var character_revive_time := 60.0
+<<<<<<< HEAD
 @export var ult_charge_time := 90.0
 @export var shoot_sound: AudioStream = preload("res://audio/sfx/player/magical_1.ogg")
 
@@ -24,6 +25,9 @@ signal form_changed(form_name: String)
 @export var fire_ult_sound: AudioStream = preload("res://audio/sfx/player/rescopicsound-elemental-magic-spell-impact-outgoing-228342.mp3")
 @export var earth_ult_sound: AudioStream = preload("res://audio/sfx/player/rescopicsound-elemental-magic-spell-impact-outgoing-228342.mp3")
 @export var wind_ult_sound: AudioStream = preload("res://audio/sfx/player/rescopicsound-elemental-magic-spell-impact-outgoing-228342.mp3")
+=======
+@export var ult_charge_time := 1.0
+>>>>>>> 018d298ad5fb11dfce127b249b5eca0f6dee11ef
 
 var pickup_range := 180.0
 var armor := 0.0
