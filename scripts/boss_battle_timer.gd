@@ -3,7 +3,7 @@ extends Node2D
 signal boss_timer_changed(time_left: float)
 signal boss_battle_started
 
-@export var boss_unlock_time: float = 900.0
+@export var boss_unlock_time: float = 360.0
 @export var boss_arena_scene: PackedScene = preload("res://tscn/boss_arena.tscn")
 
 var elapsed_time: float = 0.0

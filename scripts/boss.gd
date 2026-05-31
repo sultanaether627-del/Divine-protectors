@@ -30,6 +30,7 @@ var hit_flash_tween: Tween = null
 
 func _ready() -> void:
 	add_to_group("boss")
+	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	base_scale = scale
 	base_max_health = max_health
 	base_attack_interval = attack_interval
@@ -42,6 +43,13 @@ func _ready() -> void:
 		sprite.play("idle")
 	health_changed.emit(health, max_health)
 	_attack_loop()
+
+
+func _physics_process(_delta: float) -> void:
+	# Keep the boss stationary but participating in physics so the player
+	# cannot walk through it.
+	velocity = Vector2.ZERO
+	move_and_slide()
 
 
 func _apply_strength_scaling() -> void:

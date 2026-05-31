@@ -11,6 +11,8 @@ const DEBUG_COMBAT := false
 @export var xp_drop_scene: PackedScene = preload("res://tscn/xp_drop.tscn")
 @export var xp_drops_on_death := 1
 @export var floating_text_scene: PackedScene = preload("res://tscn/floating_text.tscn")
+# Element type: "fire", "water", "earth", "air", or "" for default
+@export var element: String = ""
 
 @onready var player = get_tree().get_first_node_in_group("player")
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
@@ -24,6 +26,13 @@ var saved_collision_layer := 1
 var saved_collision_mask := 1
 var stun_token := 0
 
+const ELEMENT_COLORS: Dictionary = {
+	"fire":  Color(1.0,  0.35, 0.1,  1.0),
+	"water": Color(0.2,  0.6,  1.0,  1.0),
+	"earth": Color(0.4,  0.75, 0.2,  1.0),
+	"air":   Color(0.85, 1.0,  1.0,  1.0),
+}
+
 
 func _ready() -> void:
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
@@ -33,7 +42,15 @@ func _ready() -> void:
 	health = max_health
 	if sprite.sprite_frames and sprite.sprite_frames.has_animation("move"):
 		sprite.play("move")
+	_apply_element_color()
 	_enemy_spawn_polish()
+
+
+func _apply_element_color() -> void:
+	if element == "" or sprite == null:
+		return
+	if ELEMENT_COLORS.has(element):
+		sprite.modulate = ELEMENT_COLORS[element]
 
 
 func _physics_process(_delta: float) -> void:
@@ -150,8 +167,11 @@ func _safe_die() -> void:
 func _flash_hit() -> void:
 	if sprite:
 		sprite.modulate = Color(3, 3, 3, 1)
+		var restore_color := Color(1, 1, 1, 1)
+		if element != "" and ELEMENT_COLORS.has(element):
+			restore_color = ELEMENT_COLORS[element]
 		var tween := create_tween()
-		tween.tween_property(sprite, "modulate", Color(1, 1, 1, 1), 0.1)
+		tween.tween_property(sprite, "modulate", restore_color, 0.1)
 
 
 func _death_effect() -> void:
@@ -206,7 +226,11 @@ func stun(duration: float) -> void:
 
 	if sprite:
 		sprite.speed_scale = 1.0
-		sprite.modulate = Color(1.0, 1.0, 1.0, 1.0)
+		# Restore element tint after stun; default enemies get white
+		if element != "" and ELEMENT_COLORS.has(element):
+			sprite.modulate = ELEMENT_COLORS[element]
+		else:
+			sprite.modulate = Color(1.0, 1.0, 1.0, 1.0)
 
 
 
@@ -228,4 +252,8 @@ func _spawn_damage_text(amount: float) -> void:
 	get_tree().current_scene.add_child(popup)
 	popup.global_position = global_position + Vector2(randf_range(-10, 10), -42)
 	popup.text = "-%d" % int(ceil(amount))
-	popup.color = Color(1.0, 0.35, 0.2, 1.0)
+	# Use element color for damage numbers, fall back to default orange-red
+	if element != "" and ELEMENT_COLORS.has(element):
+		popup.color = ELEMENT_COLORS[element]
+	else:
+		popup.color = Color(1.0, 0.35, 0.2, 1.0)

@@ -6,6 +6,12 @@ const DEBUG_SPAWN := false
 @export var fast_enemy_scene: PackedScene = preload("res://tscn/enemy_fast.tscn")
 @export var tank_enemy_scene: PackedScene = preload("res://tscn/enemy_tank.tscn")
 
+# Elemental enemy scenes
+@export var fire_enemy_scene: PackedScene = preload("res://tscn/enemy_fire.tscn")
+@export var water_enemy_scene: PackedScene = preload("res://tscn/enemy_water.tscn")
+@export var earth_enemy_scene: PackedScene = preload("res://tscn/enemy_earth.tscn")
+@export var air_enemy_scene: PackedScene = preload("res://tscn/enemy_air.tscn")
+
 @export var starting_spawn_time: float = 1.0
 @export var minimum_spawn_time: float = 0.14
 @export var spawn_time_decrease: float = 0.105
@@ -39,6 +45,16 @@ const DEBUG_SPAWN := false
 
 @export var tank_enemy_unlock_time: float = 150.0
 @export var tank_enemy_spawn_chance: float = 0.20
+
+# Elemental enemy unlock times and spawn chances
+@export var fire_enemy_unlock_time: float = 0.0
+@export var fire_enemy_spawn_chance: float = 0.20
+@export var water_enemy_unlock_time: float = 60.0
+@export var water_enemy_spawn_chance: float = 0.18
+@export var earth_enemy_unlock_time: float = 90.0
+@export var earth_enemy_spawn_chance: float = 0.12
+@export var air_enemy_unlock_time: float = 45.0
+@export var air_enemy_spawn_chance: float = 0.15
 
 var player: Node2D
 var current_spawn_time: float = 1.0
@@ -147,20 +163,36 @@ func _apply_enemy_scaling(enemy: Node) -> void:
 
 
 func _choose_enemy_scene() -> PackedScene:
-	var scene_to_spawn: PackedScene = enemy_scene
+	# Build a weighted list of available scenes based on elapsed time.
+	var candidates: Array[PackedScene] = [enemy_scene]
+
+	if elapsed_game_time >= fast_enemy_unlock_time and fast_enemy_scene != null:
+		if randf() <= fast_enemy_spawn_chance:
+			candidates.append(fast_enemy_scene)
 
 	if elapsed_game_time >= tank_enemy_unlock_time and tank_enemy_scene != null:
 		if randf() <= tank_enemy_spawn_chance:
-			scene_to_spawn = tank_enemy_scene
-		elif elapsed_game_time >= fast_enemy_unlock_time and fast_enemy_scene != null:
-			if randf() <= fast_enemy_spawn_chance:
-				scene_to_spawn = fast_enemy_scene
+			candidates.append(tank_enemy_scene)
 
-	elif elapsed_game_time >= fast_enemy_unlock_time and fast_enemy_scene != null:
-		if randf() <= fast_enemy_spawn_chance:
-			scene_to_spawn = fast_enemy_scene
+	# Elemental candidates
+	if elapsed_game_time >= fire_enemy_unlock_time and fire_enemy_scene != null:
+		if randf() <= fire_enemy_spawn_chance:
+			candidates.append(fire_enemy_scene)
 
-	return scene_to_spawn
+	if elapsed_game_time >= water_enemy_unlock_time and water_enemy_scene != null:
+		if randf() <= water_enemy_spawn_chance:
+			candidates.append(water_enemy_scene)
+
+	if elapsed_game_time >= earth_enemy_unlock_time and earth_enemy_scene != null:
+		if randf() <= earth_enemy_spawn_chance:
+			candidates.append(earth_enemy_scene)
+
+	if elapsed_game_time >= air_enemy_unlock_time and air_enemy_scene != null:
+		if randf() <= air_enemy_spawn_chance:
+			candidates.append(air_enemy_scene)
+
+	# Pick randomly from all unlocked candidates
+	return candidates[randi() % candidates.size()]
 
 
 func _get_spawn_position() -> Vector2:
