@@ -187,11 +187,16 @@ func _update_stats_label() -> void:
 	var damage_bonus: int = int(round((float(player.bullet_damage) / 10.0 - 1.0) * 100.0))
 	var speed_bonus: int = int(round((float(player.movement_speed) / 400.0 - 1.0) * 100.0))
 	var haste_bonus: int = int(round((0.25 / max(0.01, float(player.shoot_cooldown)) - 1.0) * 100.0))
-	var pickup_bonus: int = int(round((float(player.pickup_range) / 180.0 - 1.0) * 100.0))
 
-	stats_label.text = "ATK      %+d%%\nSPD      %+d%%\nHASTE    %+d%%\nPICKUP   %+d%%" % [
+	# Show pickup range as tile dots (each ● = ~32px / 1 tile of range).
+	var tile_size: float = 32.0
+	var range_tiles: int = int(round(float(player.pickup_range) / tile_size))
+	range_tiles = clamp(range_tiles, 1, 10)
+	var range_dots: String = "●".repeat(range_tiles)
+
+	stats_label.text = "ATK      %+d%%\nSPD      %+d%%\nHASTE    %+d%%\nPICKUP  %s" % [
 		damage_bonus,
 		speed_bonus,
 		haste_bonus,
-		pickup_bonus
+		range_dots
 	]

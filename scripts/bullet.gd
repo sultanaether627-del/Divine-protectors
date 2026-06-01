@@ -146,9 +146,13 @@ func _try_damage_target(node: Node) -> bool:
 		return false
 
 	has_hit = true
-	target.take_damage(damage)
+	# Use elemental take_damage if available so weaknesses are applied.
+	if target.has_method("take_damage_elemental"):
+		target.take_damage_elemental(damage, bullet_element)
+	else:
+		target.take_damage(damage)
 	if DEBUG_COMBAT:
-		print("Bullet hit ", target.name, " for ", damage, " damage")
+		print("Bullet hit ", target.name, " (element:", bullet_element, ") for ", damage, " damage")
 	return true
 
 

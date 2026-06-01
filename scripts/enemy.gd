@@ -33,6 +33,17 @@ const ELEMENT_COLORS: Dictionary = {
 	"air":   Color(0.85, 1.0,  1.0,  1.0),
 }
 
+# Elemental matchup multipliers: [attacker_element][defender_element] = multiplier
+# water > fire (1.75x), earth > air (1.75x)
+# earth > water (water weak to earth = 0.6x), air > fire (fire weak to air = 0.6x)
+# All other matchups neutral (1.0x)
+const ELEMENT_MATCHUPS: Dictionary = {
+	"water": {"fire": 1.75, "earth": 0.6,  "air": 1.0,  "water": 1.0},
+	"earth": {"air":  1.75, "water": 1.75, "fire": 1.0,  "earth": 1.0},
+	"air":   {"fire": 1.75, "water": 1.0,  "earth": 0.6, "air":   1.0},
+	"fire":  {"water": 0.6, "air":   0.6,  "earth": 1.0, "fire":  1.0},
+}
+
 
 func _ready() -> void:
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
@@ -96,7 +107,19 @@ func check_player_collision() -> void:
 			if body.has_method("take_damage"):
 				body.take_damage(damage)
 
+			# Briefly move the enemy to layer 2 so the player can walk away
+			# freely during the damage cooldown (no getting stuck).
+			var old_layer := collision_layer
+			var old_mask := collision_mask
+			collision_layer = 2
+			collision_mask = 0
+
 			await get_tree().create_timer(damage_cooldown).timeout
+
+			if not is_dead and not is_stunned:
+				collision_layer = old_layer
+				collision_mask = old_mask
+
 			can_damage = true
 
 
@@ -123,12 +146,34 @@ func take_damage(amount: float) -> void:
 		return
 
 	health -= amount
-	_spawn_damage_text(amount)
-	
+	_spawn_damage_text(amount, 1.0)
 	_flash_hit()
-	
+
 	if DEBUG_COMBAT:
 		print("Enemy health: ", health)
+
+	if health <= 0:
+		die()
+
+
+func take_damage_elemental(amount: float, attacker_element: String) -> void:
+	if is_dead:
+		return
+
+	# Look up the damage multiplier for this attacker vs this enemy's element.
+	var multiplier := 1.0
+	if element != "" and attacker_element != "" and ELEMENT_MATCHUPS.has(attacker_element):
+		var row: Dictionary = ELEMENT_MATCHUPS[attacker_element]
+		if row.has(element):
+			multiplier = float(row[element])
+
+	var final_damage := amount * multiplier
+	health -= final_damage
+	_spawn_damage_text(final_damage, multiplier)
+	_flash_hit()
+
+	if DEBUG_COMBAT:
+		print("Enemy (", element, ") hit by ", attacker_element, " x", multiplier, " -> ", final_damage)
 
 	if health <= 0:
 		die()
@@ -245,15 +290,21 @@ func _enemy_spawn_polish() -> void:
 		tween.tween_property(sprite, "modulate:a", 1.0, 0.18)
 
 
-func _spawn_damage_text(amount: float) -> void:
+func _spawn_damage_text(amount: float, multiplier: float = 1.0) -> void:
 	if floating_text_scene == null:
 		return
 	var popup = floating_text_scene.instantiate()
 	get_tree().current_scene.add_child(popup)
 	popup.global_position = global_position + Vector2(randf_range(-10, 10), -42)
 	popup.text = "-%d" % int(ceil(amount))
-	# Use element color for damage numbers, fall back to default orange-red
-	if element != "" and ELEMENT_COLORS.has(element):
+
+	# Color based on elemental matchup effectiveness:
+	# Super-effective (>1.0) = bright gold, not-very-effective (<1.0) = grey
+	if multiplier > 1.0:
+		popup.color = Color(1.0, 0.95, 0.2, 1.0)  # Gold — super effective
+	elif multiplier < 1.0:
+		popup.color = Color(0.65, 0.65, 0.65, 1.0)  # Grey — resisted
+	elif element != "" and ELEMENT_COLORS.has(element):
 		popup.color = ELEMENT_COLORS[element]
 	else:
 		popup.color = Color(1.0, 0.35, 0.2, 1.0)

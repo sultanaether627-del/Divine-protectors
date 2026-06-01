@@ -133,7 +133,10 @@ func _attribute_text() -> String:
 	var atk_bonus: int = int(round((float(player.bullet_damage) / 10.0 - 1.0) * 100.0))
 	var speed_bonus: int = int(round((float(player.movement_speed) / 400.0 - 1.0) * 100.0))
 	var haste_bonus: int = int(round((0.25 / max(0.01, float(player.shoot_cooldown)) - 1.0) * 100.0))
-	return "ATK %+d%%  SPD %+d%%  HASTE %+d%%" % [atk_bonus, speed_bonus, haste_bonus]
+	# Pickup range shown as tile dots (each ● ≈ 1 tile / 32 px of range)
+	var range_tiles: int = clamp(int(round(float(player.pickup_range) / 32.0)), 1, 8)
+	var range_dots: String = "●".repeat(range_tiles)
+	return "ATK %+d%%  SPD %+d%%  HASTE %+d%%  ◎%s" % [atk_bonus, speed_bonus, haste_bonus, range_dots]
 
 
 func _update_slots(active_key: String) -> void:

@@ -25,8 +25,8 @@ animations = [{
 "speed": 9.0
 }]
 
-[sub_resource type="RectangleShape2D" id="3"]
-size = Vector2(42, 43)
+[sub_resource type="CircleShape2D" id="3"]
+radius = 20.0
 
 [node name="WaterEnemy" type="CharacterBody2D" groups=["enemy"]]
 script = ExtResource("1")

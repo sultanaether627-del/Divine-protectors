@@ -16,7 +16,7 @@ signal form_changed(form_name: String)
 @export var healing_per_orb := 5
 @export var bullet_damage := 10.0
 @export var character_revive_time := 60.0
-@export var ult_charge_time := 90.0
+@export var ult_charge_time := 10.0
 
 var pickup_range := 180.0
 var armor := 0.0
@@ -206,6 +206,9 @@ func shooting() -> void:
 		bullet.rotation = shot_dir.angle()
 		bullet.speed_mult = projectile_speed_mult
 		bullet.size_mult = projectile_size_mult
+		# Tell the bullet which element fired it for elemental weakness calc.
+		if bullet.get("bullet_element") != null:
+			bullet.bullet_element = active_form_key
 
 	await get_tree().create_timer(shoot_cooldown).timeout
 	can_shoot = true
