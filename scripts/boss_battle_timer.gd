@@ -3,7 +3,7 @@ extends Node2D
 signal boss_timer_changed(time_left: float)
 signal boss_battle_started
 
-@export var boss_unlock_time: float = 360.0
+@export var boss_unlock_time: float = 1.0
 @export var boss_arena_scene: PackedScene = preload("res://tscn/boss_arena.tscn")
 # How long after the timer hits 0 before the boss gains another strength level.
 @export var strength_gain_interval: float = 30.0
@@ -22,13 +22,14 @@ var countdown_label: Label = null
 
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	add_to_group("boss_timer")
 	get_tree().set_meta("boss_strength_level", 0)
 	boss_timer_changed.emit(boss_unlock_time)
 
 
 func _process(delta: float) -> void:
-	if boss_started or get_tree().paused:
+	if boss_started:
 		return
 
 	elapsed_time += delta
