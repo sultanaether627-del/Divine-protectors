@@ -36,6 +36,10 @@ func _ready() -> void:
 	base_attack_interval = attack_interval
 	base_attack_damage = attack_damage
 	strength_level = int(get_tree().get_meta("boss_strength_level", 0))
+	# Scale boss stats based on player level (boss is always player level + 1).
+	var player_level: int = int(get_tree().get_meta("player_level", 1))
+	var level_bonus: int = maxi(0, player_level)  # player_level + 1 effective levels above base
+	_apply_level_scaling(level_bonus)
 	_apply_strength_scaling()
 	health = max_health
 	player = get_tree().get_first_node_in_group("player") as Node2D
@@ -50,6 +54,21 @@ func _physics_process(_delta: float) -> void:
 	# cannot walk through it.
 	velocity = Vector2.ZERO
 	move_and_slide()
+
+
+func _apply_level_scaling(player_level: int) -> void:
+	# Boss is always one effective level ahead of the player.
+	# Each player level adds 10% HP and 8% damage to the base stats.
+	var boss_level: int = player_level + 1
+	var hp_mult: float   = 1.0 + float(boss_level) * 0.10
+	var dmg_mult: float  = 1.0 + float(boss_level) * 0.08
+	var spd_mult: float  = 1.0 + float(boss_level) * 0.02
+	base_max_health  = base_max_health  * hp_mult
+	base_attack_damage = int(round(float(base_attack_damage) * dmg_mult))
+	base_attack_interval = maxf(1.5, base_attack_interval - float(boss_level) * spd_mult * 0.05)
+	if DEBUG_COMBAT:
+		print("Boss level scaling: player_level=", player_level, " boss_level=", boss_level,
+			" hp_mult=", hp_mult, " dmg_mult=", dmg_mult)
 
 
 func _apply_strength_scaling() -> void:
