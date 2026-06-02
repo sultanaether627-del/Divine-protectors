@@ -13,6 +13,8 @@ var boss_started: bool = false
 var prompt_shown: bool = false
 var extra_wait_elapsed: float = 0.0
 var current_strength_level: int = 0
+# When > 0 the player chose to wait; re-show the prompt once extra_wait_elapsed reaches this value.
+var next_prompt_at: float = -1.0
 
 # Prompt UI nodes (built at runtime so no extra .tscn needed).
 var prompt_canvas: CanvasLayer = null
@@ -32,19 +34,25 @@ func _process(delta: float) -> void:
 	var time_left := maxf(0.0, boss_unlock_time - elapsed_time)
 	boss_timer_changed.emit(time_left)
 
-	if time_left <= 0.0 and not prompt_shown:
-		_show_boss_prompt()
+	# Timer hasn't expired yet — nothing else to do.
+	if time_left > 0.0:
 		return
 
-	# While the prompt is visible (game is NOT paused here — player keeps playing),
-	# accumulate extra wait time and increase boss strength.
-	if prompt_shown and not boss_started:
-		extra_wait_elapsed += delta
-		var new_level := int(extra_wait_elapsed / strength_gain_interval)
-		if new_level != current_strength_level:
-			current_strength_level = new_level
-			get_tree().set_meta("boss_strength_level", current_strength_level)
+	# Accumulate time spent past the unlock point (whether prompt is up or not).
+	extra_wait_elapsed += delta
+
+	# Track boss strength level based on how long the player has waited.
+	var new_level := int(extra_wait_elapsed / strength_gain_interval)
+	if new_level != current_strength_level:
+		current_strength_level = new_level
+		get_tree().set_meta("boss_strength_level", current_strength_level)
+		if prompt_shown:
 			_update_prompt_label()
+
+	# Show prompt if not already visible, and the scheduled re-show time has arrived.
+	if not prompt_shown:
+		if next_prompt_at < 0.0 or extra_wait_elapsed >= next_prompt_at:
+			_show_boss_prompt()
 
 
 func _show_boss_prompt() -> void:
@@ -144,17 +152,13 @@ func _on_fight_now_pressed() -> void:
 
 
 func _on_wait_pressed() -> void:
-	# Hide the prompt; the player keeps playing and the boss keeps growing.
+	# Destroy the prompt entirely — no hidden overlay blocking input.
 	if prompt_canvas:
-		prompt_canvas.visible = false
-	# Dismiss prompt so it doesn't reappear; waiting continues via _process.
+		prompt_canvas.queue_free()
+		prompt_canvas = null
 	prompt_shown = false
-	# Schedule next prompt after one strength_gain_interval.
-	await get_tree().create_timer(strength_gain_interval, false).timeout
-	if not boss_started:
-		prompt_shown = false  # Allow _process to re-show when enough time passes.
-		# Force re-show immediately since interval already passed.
-		_show_boss_prompt()
+	# Schedule the next prompt one interval from now (tracked via extra_wait_elapsed).
+	next_prompt_at = extra_wait_elapsed + strength_gain_interval
 
 
 func _save_player_stats() -> void:
