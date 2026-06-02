@@ -80,7 +80,9 @@ func _ready() -> void:
 	}
 
 	_build_form_stats()
-	switch_form("water", true)
+	var start_form: String = get_tree().get_meta("player_active_form_key", "water") as String
+	_restore_stats_from_meta()
+	switch_form(start_form, true)
 	xp_changed.emit(current_xp, xp_required, level)
 	level_changed.emit(level, current_xp, xp_required)
 
@@ -108,6 +110,53 @@ func _build_form_stats() -> void:
 			"ult_charge": 0.0,
 			"ult_ready": false
 		}
+
+
+func _restore_stats_from_meta() -> void:
+	# If the player arrived via the boss-fight transition, SceneTree metadata
+	# holds all the stats that were saved just before the scene swap.
+	# Read them back and then clear the keys so a fresh run starts clean.
+	if not get_tree().has_meta("player_level"):
+		return  # Normal fresh start — nothing to restore.
+
+	level          = int(get_tree().get_meta("player_level", level))
+	current_xp     = int(get_tree().get_meta("player_current_xp", current_xp))
+	xp_required    = int(get_tree().get_meta("player_xp_required", xp_required))
+	bullet_damage  = float(get_tree().get_meta("player_bullet_damage", bullet_damage))
+	movement_speed = float(get_tree().get_meta("player_movement_speed", movement_speed))
+	shoot_cooldown = float(get_tree().get_meta("player_shoot_cooldown", shoot_cooldown))
+	armor          = float(get_tree().get_meta("player_armor", armor))
+	pickup_range   = float(get_tree().get_meta("player_pickup_range", pickup_range))
+	projectile_speed_mult = float(get_tree().get_meta("player_projectile_speed_mult", projectile_speed_mult))
+	projectile_size_mult  = float(get_tree().get_meta("player_projectile_size_mult", projectile_size_mult))
+	multi_shot_count      = int(get_tree().get_meta("player_multi_shot_count", multi_shot_count))
+	xp_multiplier         = float(get_tree().get_meta("player_xp_multiplier", xp_multiplier))
+	healing_per_orb       = int(get_tree().get_meta("player_healing_per_orb", healing_per_orb))
+	ult_charge_time       = float(get_tree().get_meta("player_ult_charge_time", ult_charge_time))
+
+	# Restore per-form HP (max_health drives the health bar scale, health is current HP).
+	var saved_form_health = get_tree().get_meta("player_form_health", {})
+	if typeof(saved_form_health) == TYPE_DICTIONARY:
+		for key in saved_form_health:
+			if form_stats.has(key):
+				var entry: Dictionary = saved_form_health[key]
+				form_stats[key]["max_health"] = int(entry.get("max_health", form_stats[key]["max_health"]))
+				form_stats[key]["health"]     = int(entry.get("health", form_stats[key]["health"]))
+				# Revive any knocked-out forms so the player enters the boss fight fresh.
+				form_stats[key]["dead"]       = false
+				form_stats[key]["revive_left"] = 0.0
+
+	# Clear all saved metadata so a future fresh run is unaffected.
+	for meta_key in [
+		"player_level", "player_current_xp", "player_xp_required",
+		"player_bullet_damage", "player_movement_speed", "player_shoot_cooldown",
+		"player_armor", "player_pickup_range", "player_projectile_speed_mult",
+		"player_projectile_size_mult", "player_multi_shot_count", "player_xp_multiplier",
+		"player_healing_per_orb", "player_ult_charge_time", "player_active_form_key",
+		"player_form_health"
+	]:
+		if get_tree().has_meta(meta_key):
+			get_tree().remove_meta(meta_key)
 
 
 func _unhandled_input(event: InputEvent) -> void:
