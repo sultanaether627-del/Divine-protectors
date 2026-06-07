@@ -1,9 +1,10 @@
 extends Node2D
 
 signal boss_timer_changed(time_left: float)
+signal boss_timer_post_zero(secs_until_next_strength: int, strength_level: int)
 signal boss_battle_started
 
-@export var boss_unlock_time: float = 1.0
+@export var boss_unlock_time: float = 360.0
 @export var boss_arena_scene: PackedScene = preload("res://tscn/boss_arena.tscn")
 # How long after the timer hits 0 before the boss gains another strength level.
 @export var strength_gain_interval: float = 30.0
@@ -58,6 +59,11 @@ func _process(delta: float) -> void:
 		get_tree().set_meta("boss_strength_level", current_strength_level)
 		if prompt_shown:
 			_update_prompt_strength_label()
+
+	# Keep the HUD label updated with seconds until next strength gain.
+	var next_tick_at := float(current_strength_level + 1) * strength_gain_interval
+	var secs_left := maxi(0, int(ceil(next_tick_at - extra_wait_elapsed)))
+	boss_timer_post_zero.emit(secs_left, current_strength_level)
 
 	# Update the countdown inside the prompt every frame.
 	if prompt_shown:

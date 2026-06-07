@@ -14,6 +14,8 @@ func _ready() -> void:
 
 	if timer_node.has_signal("boss_timer_changed"):
 		timer_node.boss_timer_changed.connect(_on_boss_timer_changed)
+	if timer_node.has_signal("boss_timer_post_zero"):
+		timer_node.boss_timer_post_zero.connect(_on_boss_timer_post_zero)
 	if timer_node.has_signal("boss_battle_started"):
 		timer_node.boss_battle_started.connect(_on_boss_battle_started)
 
@@ -21,6 +23,14 @@ func _ready() -> void:
 func _on_boss_timer_changed(time_left: float) -> void:
 	visible = true
 	text = "BOSS IN %s" % _format_time(time_left)
+
+
+func _on_boss_timer_post_zero(secs_until_next_strength: int, strength_level: int) -> void:
+	visible = true
+	if strength_level == 0:
+		text = "BOSS READY  |  Grows stronger in %ds" % secs_until_next_strength
+	else:
+		text = "BOSS READY  |  Lv.+%d  |  Grows in %ds" % [strength_level, secs_until_next_strength]
 
 
 func _on_boss_battle_started() -> void:
