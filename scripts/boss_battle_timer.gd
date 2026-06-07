@@ -25,6 +25,14 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	add_to_group("boss_timer")
 	get_tree().set_meta("boss_strength_level", 0)
+
+	# If the player returned here after defeating the boss, disable the timer
+	# permanently so the fight prompt never appears again this session.
+	if get_tree().has_meta("boss_already_defeated"):
+		get_tree().remove_meta("boss_already_defeated")
+		boss_started = true
+		return
+
 	boss_timer_changed.emit(boss_unlock_time)
 
 
