@@ -46,8 +46,17 @@ var tile_scale: float = 0.5
 
 func _ready() -> void:
 	_build_arena_visuals()
+	# Ensure the game is never paused when entering the boss arena.
+	# A pending level-up upgrade choice or pause state from the world scene
+	# can carry over through change_scene_to_packed and freeze the player.
+	get_tree().paused = false
 	await get_tree().process_frame
 	_connect_boss_flow()
+	# Reset upgrade_pending on the player in case a level-up was in progress
+	# when the scene transition happened — without this the player can't move.
+	var player := get_tree().get_first_node_in_group("player")
+	if player and player.get("upgrade_pending") != null:
+		player.upgrade_pending = false
 
 
 func _find_tiles_texture() -> Texture2D:
