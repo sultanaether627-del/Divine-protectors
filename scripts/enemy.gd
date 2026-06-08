@@ -145,6 +145,7 @@ func _safe_die() -> void:
 		get_tree().current_scene.add_child(xp_drop)
 		xp_drop.global_position = global_position + Vector2(randf_range(-16, 16), randf_range(-16, 16))
 
+	await get_tree().create_timer(0.12, false).timeout
 	queue_free()
 
 

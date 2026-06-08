@@ -109,3 +109,7 @@ func _screen_shake(strength: float, duration: float) -> void:
 	var shaker: Node = get_tree().get_first_node_in_group("screen_shake")
 	if shaker and shaker.has_method("shake"):
 		shaker.shake(strength, duration)
+
+	var player_node: Node = get_tree().get_first_node_in_group("player")
+	if player_node and player_node.has_method("_shake_camera"):
+		player_node._shake_camera(strength * 0.25, duration)

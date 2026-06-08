@@ -464,10 +464,13 @@ func _level_up_effect() -> void:
 func _play_sfx(stream: AudioStream) -> void:
 	if stream == null:
 		return
-	if sfx_player == null:
-		return
-	sfx_player.stream = stream
-	sfx_player.play()
+	var audio := AudioStreamPlayer.new()
+	audio.stream = stream
+	audio.bus = "Master"
+	audio.process_mode = Node.PROCESS_MODE_ALWAYS
+	get_tree().current_scene.add_child(audio)
+	audio.play()
+	audio.finished.connect(audio.queue_free)
 
 
 func _screen_shake(strength: float, duration: float) -> void:

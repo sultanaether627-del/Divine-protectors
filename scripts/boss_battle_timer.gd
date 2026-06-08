@@ -4,7 +4,7 @@ signal boss_timer_changed(time_left: float)
 signal boss_battle_started
 
 @export var boss_unlock_time: float = 900.0
-@export var boss_arena_scene: PackedScene = preload("res://tscn/boss_arena.tscn")
+@export_file("*.tscn") var boss_arena_path: String = "res://tscn/boss_arena.tscn"
 
 var elapsed_time: float = 0.0
 var boss_started: bool = false
@@ -17,29 +17,30 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	if boss_started or get_tree().paused:
+	if boss_started:
+		return
+	if get_tree().paused:
 		return
 
 	elapsed_time += delta
-	var time_left := maxf(0.0, boss_unlock_time - elapsed_time)
+	var time_left: float = maxf(0.0, boss_unlock_time - elapsed_time)
 	boss_timer_changed.emit(time_left)
 
 	if time_left <= 0.0:
-		_start_boss_battle()
+		boss_started = true
+		boss_battle_started.emit()
+		call_deferred("_start_boss_battle")
 
 
 func _start_boss_battle() -> void:
-	if boss_started:
-		return
-
-	boss_started = true
-	boss_battle_started.emit()
 	get_tree().paused = false
 
-	if boss_arena_scene == null:
-		push_error("BossBattleTimer: boss_arena_scene is missing.")
+	if not ResourceLoader.exists(boss_arena_path):
+		push_error("BossBattleTimer: boss arena path does not exist: " + boss_arena_path)
+		boss_started = false
 		return
 
-	var err := get_tree().change_scene_to_packed(boss_arena_scene)
+	var err: int = get_tree().change_scene_to_file(boss_arena_path)
 	if err != OK:
-		push_error("BossBattleTimer: Failed to change to boss arena scene.")
+		push_error("BossBattleTimer: Failed to change to boss arena scene. Error: " + str(err))
+		boss_started = false

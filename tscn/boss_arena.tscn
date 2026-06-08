@@ -8,6 +8,9 @@
 [ext_resource type="PackedScene" uid="uid://c2ere6ik3qy0o" path="res://tscn/game_ui.tscn" id="6_ui"]
 [ext_resource type="PackedScene" uid="uid://n41mqwke3svd" path="res://tscn/boss_victory_menu.tscn" id="7_victory"]
 
+[ext_resource type="PackedScene" path="res://tscn/boss_intro.tscn" id="8_boss_intro"]
+[ext_resource type="PackedScene" path="res://tscn/screen_shake.tscn" id="9_screen_shake"]
+
 [sub_resource type="Gradient" id="3_gradient"]
 colors = PackedColorArray(0.08, 0.08, 0.08, 1, 0.22, 0.22, 0.22, 1)
 
@@ -22,8 +25,6 @@ size = Vector2(1280, 64)
 [sub_resource type="RectangleShape2D" id="2_wall_v"]
 size = Vector2(64, 720)
 
-[ext_resource type="PackedScene" path="res://tscn/boss_intro.tscn" id="boss_intro"]
-[ext_resource type="PackedScene" path="res://tscn/screen_shake.tscn" id="screen_shake"]
 
 [node name="BossArena" type="Node2D"]
 script = ExtResource("4_arena_script")
@@ -83,6 +84,6 @@ layer = 20
 
 [node name="BossVictoryMenu" parent="." instance=ExtResource("7_victory")]
 
-[node name="BossIntro" parent="." instance=ExtResource("boss_intro")]
+[node name="BossIntro" parent="." instance=ExtResource("8_boss_intro")]
 
-[node name="ScreenShake" parent="." instance=ExtResource("screen_shake")]
+[node name="ScreenShake" parent="." instance=ExtResource("9_screen_shake")]

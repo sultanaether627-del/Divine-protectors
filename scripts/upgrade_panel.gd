@@ -165,7 +165,7 @@ func _on_button_unhover(index: int) -> void:
 
 
 func _choose_option(index: int) -> void:
-	_play_select_sound()
+	_play_ui_one_shot(upgrade_select_sound)
 	if player == null or index >= current_options.size():
 		return
 
@@ -209,3 +209,16 @@ func _play_select_sound() -> void:
 		return
 	sfx_player.stream = upgrade_select_sound
 	sfx_player.play()
+
+
+
+func _play_ui_one_shot(stream: AudioStream) -> void:
+	if stream == null:
+		return
+	var audio := AudioStreamPlayer.new()
+	audio.stream = stream
+	audio.bus = "Master"
+	audio.process_mode = Node.PROCESS_MODE_ALWAYS
+	get_tree().current_scene.add_child(audio)
+	audio.play()
+	audio.finished.connect(audio.queue_free)
