@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://bjrsxv6xd7uso"]
+[gd_scene load_steps=14 format=3 uid="uid://bjrsxv6xd7uso"]
 
 [ext_resource type="PackedScene" uid="uid://c6awx0bdhi4jy" path="res://tscn/boss.tscn" id="1_boss"]
 [ext_resource type="PackedScene" uid="uid://do5udaveyommk" path="res://tscn/enemy_spawner.tscn" id="2_spawner"]
@@ -7,6 +7,9 @@
 [ext_resource type="PackedScene" uid="uid://123cf2uuuqsw" path="res://tscn/player_controller.tscn" id="5_player"]
 [ext_resource type="PackedScene" uid="uid://c2ere6ik3qy0o" path="res://tscn/game_ui.tscn" id="6_ui"]
 [ext_resource type="PackedScene" uid="uid://dcvs05axvtd07" path="res://tscn/boss_victory_menu.tscn" id="7_victory"]
+
+[ext_resource type="PackedScene" path="res://tscn/boss_intro.tscn" id="8_boss_intro"]
+[ext_resource type="PackedScene" path="res://tscn/screen_shake.tscn" id="9_screen_shake"]
 
 [sub_resource type="Gradient" id="3_gradient"]
 colors = PackedColorArray(0.08, 0.08, 0.08, 1, 0.22, 0.22, 0.22, 1)
@@ -21,6 +24,7 @@ size = Vector2(1280, 64)
 
 [sub_resource type="RectangleShape2D" id="2_wall_v"]
 size = Vector2(64, 720)
+
 
 [node name="BossArena" type="Node2D"]
 script = ExtResource("4_arena_script")
@@ -79,3 +83,7 @@ layer = 20
 [node name="BossHealthBar" parent="BossCanvas" instance=ExtResource("3_boss_hp")]
 
 [node name="BossVictoryMenu" parent="." instance=ExtResource("7_victory")]
+
+[node name="BossIntro" parent="." instance=ExtResource("8_boss_intro")]
+
+[node name="ScreenShake" parent="." instance=ExtResource("9_screen_shake")]

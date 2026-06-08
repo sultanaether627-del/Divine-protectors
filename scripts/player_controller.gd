@@ -16,7 +16,18 @@ signal form_changed(form_name: String)
 @export var healing_per_orb := 5
 @export var bullet_damage := 10.0
 @export var character_revive_time := 60.0
+
 @export var ult_charge_time := 10.0
+
+
+@export var level_up_sound: AudioStream = preload("res://audio/sfx/ui/level_up.wav")
+@export var ult_ready_sound: AudioStream = preload("res://audio/sfx/ui/ult_ready.wav")
+@export var upgrade_select_sound: AudioStream = preload("res://audio/sfx/ui/button_click.wav")
+@export var water_ult_sound: AudioStream = preload("res://audio/sfx/player/ult_water.wav")
+@export var fire_ult_sound: AudioStream = preload("res://audio/sfx/player/ult_fire.wav")
+@export var earth_ult_sound: AudioStream = preload("res://audio/sfx/player/ult_earth.wav")
+@export var wind_ult_sound: AudioStream = preload("res://audio/sfx/player/ult_wind.wav")
+
 
 var pickup_range := 180.0
 var armor := 0.0
@@ -36,6 +47,7 @@ var xp_multiplier := 1.0
 @export var wind_ult_scene: PackedScene = preload("res://tscn/ults/wind_ult.tscn")
 
 @onready var forms_root: Node2D = $FormsRoot
+@onready var sfx_player: AudioStreamPlayer = AudioStreamPlayer.new()
 
 @export var swap_effect_scene: PackedScene = preload("res://tscn/swap_effect.tscn")
 @export var floating_text_scene: PackedScene = preload("res://tscn/floating_text.tscn")
@@ -63,6 +75,8 @@ var element_colors := {
 
 func _ready() -> void:
 	add_to_group("player")
+	add_child(sfx_player)
+	sfx_player.bus = "Master"
 	xp_required = starting_xp_required
 
 	form_scenes = {
@@ -484,6 +498,8 @@ func _shake_camera(strength: float, duration: float) -> void:
 
 
 func _level_up_effect() -> void:
+	_play_sfx(level_up_sound)
+	_screen_shake(5.0, 0.14)
 	_spawn_floating_text("LEVEL UP!", Color(1.0, 0.88, 0.25, 1.0), global_position + Vector2(0, -90))
 	if active_form and active_form.has_node("AnimatedSprite2D"):
 		var s: AnimatedSprite2D = active_form.get_node("AnimatedSprite2D")
@@ -497,6 +513,39 @@ func _level_up_effect() -> void:
 	
 	_shake_camera(2.0, 0.06)
 
+
+
+
+func _play_sfx(stream: AudioStream) -> void:
+	if stream == null:
+		return
+	var audio := AudioStreamPlayer.new()
+	audio.stream = stream
+	audio.bus = "Master"
+	audio.process_mode = Node.PROCESS_MODE_ALWAYS
+	get_tree().current_scene.add_child(audio)
+	audio.play()
+	audio.finished.connect(audio.queue_free)
+
+
+func _screen_shake(strength: float, duration: float) -> void:
+	var shaker: Node = get_tree().get_first_node_in_group("screen_shake")
+	if shaker and shaker.has_method("shake"):
+		shaker.shake(strength, duration)
+
+
+func _play_ult_sfx(element_key: String) -> void:
+	match element_key:
+		"water":
+			_play_sfx(water_ult_sound)
+		"fire":
+			_play_sfx(fire_ult_sound)
+		"earth":
+			_play_sfx(earth_ult_sound)
+		"wind":
+			_play_sfx(wind_ult_sound)
+		_:
+			pass
 
 
 func _play_swap_effect(form_key: String) -> void:
@@ -544,6 +593,8 @@ func cast_ult() -> void:
 		return
 
 	if active_form_key == "wind":
+		_play_ult_sfx(active_form_key)
+		_screen_shake(7.0, 0.18)
 		_cast_wind_dash_ult()
 		_reset_active_ult()
 		return
@@ -561,6 +612,8 @@ func cast_ult() -> void:
 	ult.z_as_relative = false
 
 	get_tree().current_scene.add_child(ult)
+	_play_ult_sfx(active_form_key)
+	_screen_shake(8.0, 0.2)
 
 	_reset_active_ult()
 	if DEBUG_COMBAT:

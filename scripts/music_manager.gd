@@ -90,7 +90,7 @@ func _get_tracks_for_group(group_name: String) -> Array:
 	var tracks: Array = []
 	for path in paths:
 		if ResourceLoader.exists(path):
-			var stream := load(path)
+			var stream: Resource = load(path)
 			if stream:
 				tracks.append(stream)
 	return tracks

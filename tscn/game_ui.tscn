@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://c2ere6ik3qy0o"]
+[gd_scene load_steps=8 format=3 uid="uid://c2ere6ik3qy0o"]
 
 [ext_resource type="PackedScene" path="res://tscn/upgrade_panel.tscn" id="1_upgrade"]
 [ext_resource type="Script" path="res://scripts/boss_timer_label.gd" id="2_boss_timer_label"]
@@ -6,8 +6,12 @@
 [ext_resource type="PackedScene" path="res://tscn/game_over.tscn" id="4_gameover"]
 [ext_resource type="PackedScene" path="res://tscn/bottom_hud.tscn" id="5_bottom"]
 
+[ext_resource type="PackedScene" path="res://tscn/screen_shake.tscn" id="9_shake"]
+
 [node name="GameUI" type="CanvasLayer"]
 layer = 10
+
+[node name="ScreenShake" parent="." instance=ExtResource("9_shake")]
 
 [node name="BottomHUD" parent="." instance=ExtResource("5_bottom")]
 
