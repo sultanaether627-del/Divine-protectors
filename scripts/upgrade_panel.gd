@@ -25,6 +25,9 @@ extends PanelContainer
 var player: Node = null
 var current_options: Array = []
 
+@export var upgrade_select_sound: AudioStream = preload("res://audio/sfx/ui/button_click.wav")
+var sfx_player: AudioStreamPlayer = null
+
 const UPGRADE_ICONS := {
 	"fire_rate": preload("res://UI-20260510T082413Z-3-001/UI/attack speed.png"),
 	"healing": preload("res://UI-20260510T082413Z-3-001/UI/lifesteal.png"),
@@ -70,6 +73,9 @@ const UPGRADE_DESCRIPTIONS := {
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	sfx_player = AudioStreamPlayer.new()
+	add_child(sfx_player)
+	sfx_player.bus = "Master"
 	visible = false
 
 	await get_tree().process_frame
@@ -159,6 +165,7 @@ func _on_button_unhover(index: int) -> void:
 
 
 func _choose_option(index: int) -> void:
+	_play_select_sound()
 	if player == null or index >= current_options.size():
 		return
 
@@ -195,3 +202,10 @@ func _update_stats_label() -> void:
 		haste_bonus,
 		pickup_bonus
 	]
+
+
+func _play_select_sound() -> void:
+	if sfx_player == null or upgrade_select_sound == null:
+		return
+	sfx_player.stream = upgrade_select_sound
+	sfx_player.play()

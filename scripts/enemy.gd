@@ -124,6 +124,7 @@ func die() -> void:
 	is_dead = true
 	remove_from_group("enemy")
 	set_physics_process(false)
+	_death_pop_polish()
 	call_deferred("_safe_die")
 
 
@@ -229,3 +230,20 @@ func _spawn_damage_text(amount: float) -> void:
 	popup.global_position = global_position + Vector2(randf_range(-10, 10), -42)
 	popup.text = "-%d" % int(ceil(amount))
 	popup.color = Color(1.0, 0.35, 0.2, 1.0)
+
+func _screen_shake(strength: float, duration: float) -> void:
+	var shaker: Node = get_tree().get_first_node_in_group("screen_shake")
+	if shaker and shaker.has_method("shake"):
+		shaker.shake(strength, duration)
+
+
+
+func _death_pop_polish() -> void:
+	if sprite == null:
+		return
+	if scale.x >= 1.8 or max_health >= 100.0:
+		_screen_shake(4.0, 0.12)
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(sprite, "scale", sprite.scale * 1.25, 0.08).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_property(sprite, "modulate:a", 0.0, 0.18)
