@@ -46,8 +46,6 @@ var elapsed_game_time: float = 0.0
 
 
 func _ready() -> void:
-	process_mode = Node.PROCESS_MODE_ALWAYS
-
 	await get_tree().process_frame
 
 	player = get_tree().get_first_node_in_group("player") as Node2D

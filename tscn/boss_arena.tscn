@@ -6,7 +6,7 @@
 [ext_resource type="Script" path="res://scripts/boss_arena.gd" id="4_arena_script"]
 [ext_resource type="PackedScene" uid="uid://123cf2uuuqsw" path="res://tscn/player_controller.tscn" id="5_player"]
 [ext_resource type="PackedScene" uid="uid://c2ere6ik3qy0o" path="res://tscn/game_ui.tscn" id="6_ui"]
-[ext_resource type="PackedScene" uid="uid://n41mqwke3svd" path="res://tscn/boss_victory_menu.tscn" id="7_victory"]
+[ext_resource type="PackedScene" uid="uid://dcvs05axvtd07" path="res://tscn/boss_victory_menu.tscn" id="7_victory"]
 
 [sub_resource type="Gradient" id="3_gradient"]
 colors = PackedColorArray(0.08, 0.08, 0.08, 1, 0.22, 0.22, 0.22, 1)

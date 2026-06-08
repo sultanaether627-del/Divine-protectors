@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3 uid="uid://dkew1gs84bw8u"]
 
 [ext_resource type="Texture2D" uid="uid://vcc3rxx6qnyw" path="res://UI-20260510T082413Z-3-001/UI/play.png" id="1_ib1pf"]
-[ext_resource type="Texture2D" uid="uid://b4rqf366ica3a" path="res://pixel_art__dungeon_entrance_door_by_kristyglas_ddto0gw-pre.jpg" id="1_oankt"]
+[ext_resource type="Texture2D" uid="uid://dmnlsa0f0qu7e" path="res://UI-20260510T082413Z-3-001/UI/Untitled156_20260521132813 (1).png" id="1_kfgmd"]
 [ext_resource type="Script" path="res://Ui button testing final res/playbutton.gd" id="2_j0ka7"]
 [ext_resource type="Texture2D" uid="uid://dil7oajkkdqyn" path="res://UI-20260510T082413Z-3-001/UI/quit.png" id="8_quit"]
 [ext_resource type="Script" path="res://Ui button testing final res/quit.gd" id="9_quit"]
@@ -19,19 +19,26 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = -7.0
+offset_top = 3.0
+offset_right = -7.0
+offset_bottom = 3.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("1_oankt")
+texture = ExtResource("1_kfgmd")
 expand_mode = 1
 stretch_mode = 4
 
 [node name="play button" type="Button" parent="."]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.02
-anchor_top = 0.15
-anchor_right = 0.15
-anchor_bottom = 0.25
+anchor_left = 0.854
+anchor_top = 0.125
+anchor_right = 1.027
+anchor_bottom = 0.298
+offset_left = -80.808
+offset_right = 51.8959
+offset_bottom = -8.104
 grow_horizontal = 2
 grow_vertical = 2
 icon = ExtResource("1_ib1pf")
@@ -41,10 +48,14 @@ script = ExtResource("2_j0ka7")
 [node name="quit" type="Button" parent="."]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.02
-anchor_top = 0.7
-anchor_right = 0.15
-anchor_bottom = 0.8
+anchor_left = 0.849
+anchor_top = 0.613
+anchor_right = 1.0
+anchor_bottom = 0.782
+offset_left = -89.048
+offset_top = -0.22403
+offset_right = 69.0
+offset_bottom = -5.73605
 grow_horizontal = 2
 grow_vertical = 2
 icon = ExtResource("8_quit")
