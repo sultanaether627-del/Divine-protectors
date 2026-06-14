@@ -1,11 +1,11 @@
 extends Area2D
 
 @export var xp_amount := 1
-@export var attract_distance := 400.0
-@export var collect_distance := 32.0
+@export var attract_distance := 180.0
+@export var collect_distance := 18.0
 
-@export var move_speed := 1000.0
-@export var max_move_speed := 1600.0
+@export var move_speed := 45.0
+@export var max_move_speed := 650.0
 @export var acceleration := 9.0
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D

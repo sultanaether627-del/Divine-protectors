@@ -4,6 +4,7 @@ const DEBUG_REFLECT := false
 
 @export var speed: float = 450.0
 @export var reflected_speed: float = 900.0
+@export var homing_turn_speed: float = 4.5
 @export var base_hp: float = 20.0
 @export var damage_to_player: int = 120
 @export var damage_to_boss: float = 180.0
@@ -70,7 +71,11 @@ func _physics_process(delta: float) -> void:
 		if global_position.distance_to(boss.global_position) <= 70.0:
 			_hit_boss()
 	else:
+		if target_player and is_instance_valid(target_player):
+			var desired_dir: Vector2 = global_position.direction_to(target_player.global_position).normalized()
+			direction = direction.slerp(desired_dir, clampf(homing_turn_speed * delta, 0.0, 1.0)).normalized()
 		global_position += direction * speed * delta
+
 		if target_player and is_instance_valid(target_player):
 			if global_position.distance_to(target_player.global_position) <= radius + 18.0:
 				_hit_player()
