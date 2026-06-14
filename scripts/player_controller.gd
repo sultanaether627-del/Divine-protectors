@@ -247,6 +247,8 @@ func shooting() -> void:
 
 	can_shoot = false
 
+	SFXManager.play_shoot(active_form_key)
+
 	var aim_dir := global_position.direction_to(get_global_mouse_position())
 	if aim_dir == Vector2.ZERO:
 		aim_dir = Vector2.RIGHT
