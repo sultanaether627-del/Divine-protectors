@@ -24,9 +24,9 @@ func _on_continue_pressed() -> void:
 	visible = false
 	get_tree().paused = false
 	_save_player_stats()
-	# Tell the fresh BossBattleTimer in world.tscn that the boss is already dead
-	# so it never re-triggers the fight prompt.
-	get_tree().set_meta("boss_already_defeated", true)
+	# Increment defeat counter so the next boss spawns at 2^N power.
+	var defeat_count: int = int(get_tree().get_meta("boss_defeat_count", 0)) + 1
+	get_tree().set_meta("boss_defeat_count", defeat_count)
 	var err: int = get_tree().change_scene_to_file("res://tscn/world.tscn")
 	if err != OK:
 		push_error("BossVictoryMenu: Could not return to res://tscn/world.tscn")

@@ -58,7 +58,8 @@ func _ready() -> void:
 		push_error("EnemySpawner: fire_enemy_scene is missing.")
 		return
 
-	current_spawn_time = starting_spawn_time
+	# Apply difficulty spawn-wait multiplier so harder modes spawn enemies faster.
+	current_spawn_time = starting_spawn_time * DifficultyManager.get_spawn_wait_multiplier()
 
 	if spawn_immediately and not get_tree().paused:
 		spawn_enemy()
@@ -92,7 +93,8 @@ func difficulty_loop() -> void:
 				minimum_spawn_time,
 				current_spawn_time - spawn_time_decrease
 			)
-			print("New spawn time: ", current_spawn_time)
+			if DEBUG_SPAWN:
+				print("New spawn time: ", current_spawn_time)
 
 
 func spawn_enemy() -> void:
@@ -127,9 +129,35 @@ func spawn_enemy() -> void:
 
 func _apply_enemy_scaling(enemy: Node) -> void:
 	var minutes_alive: float = elapsed_game_time / 60.0
-	var health_mult: float = min(max_enemy_health_multiplier, 1.0 + minutes_alive * enemy_health_growth_per_minute)
-	var damage_mult: float = 1.0 + minutes_alive * enemy_damage_growth_per_minute
 	var speed_mult: float = 1.0 + minutes_alive * enemy_speed_growth_per_minute
+
+	var health_mult: float = 1.0
+	var damage_mult: float = 1.0
+
+	var defeat_count: int = int(get_tree().get_meta("boss_defeat_count", 0))
+	if defeat_count == 0:
+		# First run — original time-based scaling.
+		health_mult = minf(max_enemy_health_multiplier, 1.0 + minutes_alive * enemy_health_growth_per_minute)
+		damage_mult = 1.0 + minutes_alive * enemy_damage_growth_per_minute
+	else:
+		# Post-first-defeat — DPS-aware scaling so upgraded players stay challenged.
+		var player_node := get_tree().get_first_node_in_group("player")
+		var player_lv: int = 1
+		var player_dps: float = 15.0
+		if player_node:
+			if player_node.get("level") != null:
+				player_lv = int(player_node.get("level"))
+			var bullet_dmg: float = float(player_node.get("bullet_damage")) if player_node.get("bullet_damage") != null else 10.0
+			var cooldown: float = float(player_node.get("shoot_cooldown")) if player_node.get("shoot_cooldown") != null else 0.25
+			var multi: int = int(player_node.get("multi_shot_count")) if player_node.get("multi_shot_count") != null else 1
+			player_dps = (bullet_dmg * float(multi)) / maxf(0.01, cooldown)
+		health_mult = minf(12.0, maxf(1.0, player_dps / 15.0))
+		damage_mult = 1.0 + float(player_lv) * 0.15
+
+	# Apply difficulty multipliers on top of all other scaling.
+	health_mult *= DifficultyManager.get_enemy_hp_multiplier()
+	damage_mult *= DifficultyManager.get_enemy_damage_multiplier()
+	speed_mult  *= DifficultyManager.get_enemy_speed_multiplier()
 
 	if enemy.get("max_health") != null:
 		enemy.set("max_health", float(enemy.get("max_health")) * health_mult)

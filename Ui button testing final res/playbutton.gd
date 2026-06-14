@@ -2,7 +2,8 @@ extends Button
 
 func _on_pressed() -> void:
 	_play_button_click()
-	get_tree().change_scene_to_file("res://tscn/world.tscn")
+	# Go to difficulty select first; that screen will load world.tscn after a choice is made.
+	get_tree().change_scene_to_file("res://tscn/difficulty_select.tscn")
 
 
 func _play_button_click() -> void:

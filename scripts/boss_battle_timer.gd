@@ -58,12 +58,6 @@ func _process(delta: float) -> void:
 	if time_left > 0.0:
 		return
 
-	if time_left <= 0.0:
-		boss_started = true
-		boss_battle_started.emit()
-		call_deferred("_start_boss_battle")
-
-
 	# Accumulate time spent past the unlock point (whether prompt is up or not).
 	extra_wait_elapsed += delta
 
@@ -95,7 +89,9 @@ func _show_boss_prompt() -> void:
 
 	prompt_canvas = CanvasLayer.new()
 	prompt_canvas.layer = 100
+	prompt_canvas.process_mode = Node.PROCESS_MODE_ALWAYS
 	add_child(prompt_canvas)
+	get_tree().paused = true
 
 	# Dark overlay.
 	var overlay := ColorRect.new()
@@ -214,6 +210,7 @@ func _on_fight_now_pressed() -> void:
 
 
 func _on_wait_pressed() -> void:
+	get_tree().paused = false
 	# Destroy the prompt entirely — no hidden overlay blocking input.
 	if prompt_canvas:
 		prompt_canvas.queue_free()

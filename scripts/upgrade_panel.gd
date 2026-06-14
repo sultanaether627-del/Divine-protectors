@@ -44,7 +44,7 @@ const UPGRADE_ICONS := {
 
 const UPGRADE_NAMES := {
 	"fire_rate": "Attack Speed",
-	"healing": "Life Steal",
+	"healing": "Life Boost",
 	"damage": "Damage",
 	"health": "Max Health",
 	"movement_speed": "Move Speed",

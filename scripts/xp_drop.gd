@@ -75,10 +75,12 @@ func collect() -> void:
 		await tween.finished
 
 	if player:
+		# Scale XP by the difficulty exp multiplier.
+		var scaled_xp: int = maxi(1, int(round(float(xp_amount) * DifficultyManager.get_exp_multiplier())))
 		if player.has_method("collect_xp_orb"):
-			player.collect_xp_orb(xp_amount)
+			player.collect_xp_orb(scaled_xp)
 
 		elif player.has_method("add_xp"):
-			player.add_xp(xp_amount)
+			player.add_xp(scaled_xp)
 
 	queue_free()

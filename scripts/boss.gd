@@ -32,14 +32,32 @@ func _ready() -> void:
 	add_to_group("boss")
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	base_scale = scale
-	base_max_health = max_health
-	base_attack_interval = attack_interval
-	base_attack_damage = attack_damage
 	strength_level = int(get_tree().get_meta("boss_strength_level", 0))
-	# Scale boss stats based on player level (boss is always player level + 1).
+
+	# Boss level is always player level + 1.
+	# Prefer live player node so the level is correct even on a fresh game start.
 	var player_level: int = int(get_tree().get_meta("player_level", 1))
-	var level_bonus: int = maxi(0, player_level)  # player_level + 1 effective levels above base
-	_apply_level_scaling(level_bonus)
+	var live_player := get_tree().get_first_node_in_group("player")
+	if live_player and live_player.get("level") != null:
+		player_level = int(live_player.get("level"))
+	var boss_level: int = player_level + 1
+
+	# Fixed level-scaled base stats.
+	base_max_health = 800.0 + float(boss_level) * 350.0
+	base_attack_damage = 30 + boss_level * 12
+	base_attack_interval = attack_interval
+
+	# Each defeat doubles the boss power (2^N compounding multiplier).
+	var defeat_count: int = int(get_tree().get_meta("boss_defeat_count", 0))
+	var rematch_mult: float = pow(2.0, defeat_count)
+	base_max_health = base_max_health * rematch_mult
+	base_attack_damage = int(round(float(base_attack_damage) * rematch_mult))
+
+	# Apply difficulty boss HP multiplier (damage intentionally not scaled here —
+	# enemy_dmg covers regular enemies; boss damage is already high).
+	base_max_health = base_max_health * DifficultyManager.get_boss_hp_multiplier()
+
+	_apply_level_scaling(player_level)
 	_apply_strength_scaling()
 	health = max_health
 	player = get_tree().get_first_node_in_group("player") as Node2D
@@ -58,29 +76,37 @@ func _physics_process(_delta: float) -> void:
 
 func _apply_level_scaling(player_level: int) -> void:
 	# Boss is always one effective level ahead of the player.
-	# Each player level adds 10% HP and 8% damage to the base stats.
 	var boss_level: int = player_level + 1
-	var hp_mult: float   = 1.0 + float(boss_level) * 0.10
-	var dmg_mult: float  = 1.0 + float(boss_level) * 0.08
-	var spd_mult: float  = 1.0 + float(boss_level) * 0.02
-	base_max_health  = base_max_health  * hp_mult
+	var hp_mult: float  = 1.0 + float(boss_level) * 0.25
+	var dmg_mult: float = 1.0 + float(boss_level) * 0.18
+	var spd_mult: float = 1.0 + float(boss_level) * 0.02
+	base_max_health    = base_max_health * hp_mult
 	base_attack_damage = int(round(float(base_attack_damage) * dmg_mult))
 	base_attack_interval = maxf(1.5, base_attack_interval - float(boss_level) * spd_mult * 0.05)
 	if DEBUG_COMBAT:
 		print("Boss level scaling: player_level=", player_level, " boss_level=", boss_level,
-			" hp_mult=", hp_mult, " dmg_mult=", dmg_mult)
+			" hp_mult=", hp_mult, " dmg_mult=", dmg_mult,
+			" base_hp=", base_max_health, " base_dmg=", base_attack_damage)
 
 
 func _apply_strength_scaling() -> void:
 	var health_multiplier: float = 1.0 + (float(strength_level) * health_per_strength_level)
 	var damage_multiplier: float = 1.0 + (float(strength_level) * damage_per_strength_level)
 	var scale_multiplier: float = 1.0 + (float(strength_level) * scale_per_strength_level)
+	
 	max_health = base_max_health * health_multiplier
 	attack_damage = int(round(base_attack_damage * damage_multiplier))
 	attack_interval = maxf(1.5, base_attack_interval - (float(strength_level) * attack_speed_gain_per_level))
 	scale = base_scale * scale_multiplier
+	
+	# Clamp final values to prevent extreme stats (high caps allow rematch doublings)
+	max_health = clampf(max_health, 500.0, 500000.0)
+	attack_damage = clampi(attack_damage, 15, 5000)
+	
 	if DEBUG_COMBAT:
 		print("Boss strength level: ", strength_level, " HP: ", max_health, " DMG: ", attack_damage, " Interval: ", attack_interval)
+
+
 
 
 func _attack_loop() -> void:
