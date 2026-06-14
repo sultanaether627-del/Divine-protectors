@@ -634,6 +634,7 @@ func _cast_wind_dash_ult() -> void:
 	var dash_width: float = 120.0
 	var start_pos: Vector2 = global_position
 	var end_pos: Vector2 = start_pos + aim_dir.normalized() * dash_distance
+	end_pos = _clamp_dash_end_position(end_pos)
 
 	_kill_enemies_along_dash(start_pos, end_pos, dash_width)
 
@@ -641,6 +642,22 @@ func _cast_wind_dash_ult() -> void:
 	tween.tween_property(self, "global_position", end_pos, 0.18).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 	_play_wind_dash_fx(start_pos, end_pos)
+
+
+
+func _clamp_dash_end_position(end_pos: Vector2) -> Vector2:
+	var scene := get_tree().current_scene
+	if scene == null:
+		return end_pos
+
+	# Boss arena bounds from boss_arena.tscn walls.
+	if scene.name == "BossArena" or scene.scene_file_path.ends_with("boss_arena.tscn"):
+		return Vector2(
+			clampf(end_pos.x, 96.0, 1184.0),
+			clampf(end_pos.y, 110.0, 650.0)
+		)
+
+	return end_pos
 
 
 func _kill_enemies_along_dash(start_pos: Vector2, end_pos: Vector2, width: float) -> void:

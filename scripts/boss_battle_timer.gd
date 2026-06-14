@@ -5,7 +5,7 @@ signal boss_timer_post_zero(secs_until_next_strength: int, strength_level: int)
 signal boss_battle_started
 
 
-@export var boss_unlock_time: float = 360.0
+@export var boss_unlock_time: float = 1.0
 @export var boss_arena_scene: PackedScene = preload("res://tscn/boss_arena.tscn")
 # How long after the timer hits 0 before the boss gains another strength level.
 @export var strength_gain_interval: float = 30.0

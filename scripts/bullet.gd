@@ -159,6 +159,8 @@ func _try_damage_target(node: Node) -> bool:
 func _find_damage_target(node: Node) -> Node:
 	var current: Node = node
 	while current != null:
+		if current.is_in_group("boss_reflect_projectile") and current.has_method("take_damage"):
+			return current
 		if (current.is_in_group("enemy") or current.is_in_group("boss")) and current.has_method("take_damage"):
 			return current
 		current = current.get_parent()
