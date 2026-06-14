@@ -72,6 +72,13 @@ var element_colors := {
 	"wind": Color(0.55, 1.0, 0.65, 1.0)
 }
 
+var element_identity_stats := {
+	"water": {"damage": 0.95, "speed": 1.0, "armor": 1.10, "healing": 1.25},
+	"fire": {"damage": 1.18, "speed": 1.0, "armor": 1.0, "healing": 1.0},
+	"earth": {"damage": 1.0, "speed": 0.90, "armor": 1.25, "healing": 1.0},
+	"wind": {"damage": 0.92, "speed": 1.18, "armor": 0.95, "healing": 1.0}
+}
+
 
 func _ready() -> void:
 	add_to_group("player")
@@ -110,7 +117,7 @@ func _build_form_stats() -> void:
 		var scene: PackedScene = form_scenes[key]
 		if scene == null:
 			continue
-		var preview = scene.instantiate()
+		var preview: Node = scene.instantiate()
 		var display_name: String = str(preview.get("display_name"))
 		var max_hp: int = int(preview.get("base_max_health"))
 		preview.free()
@@ -202,7 +209,7 @@ func movement() -> void:
 	var input_dir := Vector2(x_mov, y_mov)
 
 	if active_form and active_form.has_method("set_facing"):
-		var aim_dir := global_position.direction_to(get_global_mouse_position())
+		var aim_dir: Vector2 = global_position.direction_to(get_global_mouse_position())
 		active_form.set_facing(aim_dir.x)
 
 	var target_velocity := input_dir.normalized() * movement_speed
@@ -221,12 +228,20 @@ func animate_player() -> void:
 		var walking_backwards := false
 
 		if moving:
-			var aim_dir := global_position.direction_to(get_global_mouse_position())
+			var aim_dir: Vector2 = global_position.direction_to(get_global_mouse_position())
 			var move_dir := velocity.normalized()
 			if aim_dir != Vector2.ZERO:
 				walking_backwards = move_dir.dot(aim_dir.normalized()) < 0.0
 
 		active_form.play_movement(moving, walking_backwards)
+
+
+
+func _element_stat(stat_name: String, fallback: float = 1.0) -> float:
+	if element_identity_stats.has(active_form_key):
+		var data: Dictionary = element_identity_stats[active_form_key]
+		return float(data.get(stat_name, fallback))
+	return fallback
 
 
 func shooting() -> void:
@@ -249,12 +264,12 @@ func shooting() -> void:
 
 	SFXManager.play_shoot(active_form_key)
 
-	var aim_dir := global_position.direction_to(get_global_mouse_position())
+	var aim_dir: Vector2 = global_position.direction_to(get_global_mouse_position())
 	if aim_dir == Vector2.ZERO:
 		aim_dir = Vector2.RIGHT
 
 	for shot in range(multi_shot_count):
-		var bullet = current_bullet_scene.instantiate()
+		var bullet: Node = current_bullet_scene.instantiate()
 		get_tree().current_scene.add_child(bullet)
 
 		if active_form.has_method("get_shot_position"):
@@ -262,14 +277,14 @@ func shooting() -> void:
 		else:
 			bullet.global_position = global_position
 
-		var spread_angle := 0.0
+		var spread_angle: float = 0.0
 		if multi_shot_count > 1:
 			spread_angle = deg_to_rad(8.0) * (shot - (multi_shot_count - 1) / 2.0)
-		var shot_dir := aim_dir.rotated(spread_angle)
+		var shot_dir: Vector2 = aim_dir.rotated(spread_angle)
 		bullet.direction = shot_dir
-		bullet.damage = bullet_damage
+		bullet.damage = bullet_damage * _element_stat("damage", 1.0)
 		bullet.rotation = shot_dir.angle()
-		bullet.speed_mult = projectile_speed_mult
+		bullet.speed_mult = projectile_speed_mult * _element_stat("speed", 1.0)
 		bullet.size_mult = projectile_size_mult
 		# Tell the bullet which element fired it for elemental weakness calc.
 		if bullet.get("bullet_element") != null:
@@ -317,7 +332,8 @@ func take_damage(amount: int) -> void:
 	if is_active_form_dead():
 		return
 
-	var reduced := int(ceil(float(amount) * (1.0 - armor)))
+	var total_armor: float = clampf(armor + (_element_stat("armor", 1.0) - 1.0), 0.0, 0.75)
+	var reduced := int(ceil(float(amount) * (1.0 - total_armor)))
 	form_stats[active_form_key]["health"] = int(clamp(int(form_stats[active_form_key]["health"]) - reduced, 0, int(form_stats[active_form_key]["max_health"])))
 	_emit_health()
 	
@@ -333,7 +349,8 @@ func take_damage(amount: int) -> void:
 func heal(amount: int) -> void:
 	if is_active_form_dead():
 		return
-	form_stats[active_form_key]["health"] = int(clamp(int(form_stats[active_form_key]["health"]) + amount, 0, int(form_stats[active_form_key]["max_health"])))
+	var final_heal: int = int(ceil(float(amount) * _element_stat("healing", 1.0)))
+	form_stats[active_form_key]["health"] = int(clamp(int(form_stats[active_form_key]["health"]) + final_heal, 0, int(form_stats[active_form_key]["max_health"])))
 	_emit_health()
 	if DEBUG_COMBAT:
 		print("Healed ", form_stats[active_form_key]["display"], ": +", amount, " HP: ", form_stats[active_form_key]["health"], "/", form_stats[active_form_key]["max_health"])
@@ -447,7 +464,7 @@ func _make_upgrade_options() -> Array:
 
 
 func apply_upgrade(upgrade_type: String, percent: int) -> void:
-	var multiplier := 1.0 + float(percent) / 100.0
+	var multiplier: float = 1.0 + float(percent) / 100.0
 
 	match upgrade_type:
 		"fire_rate":
@@ -489,7 +506,7 @@ func _shake_camera(strength: float, duration: float) -> void:
 	var camera: Camera2D = $Camera2D
 	if camera:
 		var original_offset := camera.offset
-		var tween := create_tween()
+		var tween: Tween = create_tween()
 		var steps := int(duration / 0.02)
 		for _i in range(steps):
 			tween.tween_callback(func():
@@ -505,7 +522,7 @@ func _level_up_effect() -> void:
 	_spawn_floating_text("LEVEL UP!", Color(1.0, 0.88, 0.25, 1.0), global_position + Vector2(0, -90))
 	if active_form and active_form.has_node("AnimatedSprite2D"):
 		var s: AnimatedSprite2D = active_form.get_node("AnimatedSprite2D")
-		var tween := create_tween()
+		var tween: Tween = create_tween()
 		tween.set_parallel(true)
 		tween.tween_property(s, "modulate", Color(1.5, 1.5, 2.0, 1), 0.1)
 		tween.tween_property(s, "scale", Vector2(1.15, 1.15), 0.1)
@@ -640,7 +657,7 @@ func _cast_wind_dash_ult() -> void:
 
 	_kill_enemies_along_dash(start_pos, end_pos, dash_width)
 
-	var tween := create_tween()
+	var tween: Tween = create_tween()
 	tween.tween_property(self, "global_position", end_pos, 0.18).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 	_play_wind_dash_fx(start_pos, end_pos)
@@ -697,7 +714,7 @@ func _play_wind_dash_fx(start_pos: Vector2, end_pos: Vector2) -> void:
 	line.add_point(end_pos)
 	get_tree().current_scene.add_child(line)
 
-	var tween := create_tween()
+	var tween: Tween = create_tween()
 	tween.tween_property(line, "modulate:a", 0.0, 0.28)
 	tween.tween_callback(Callable(line, "queue_free"))
 

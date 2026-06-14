@@ -43,6 +43,9 @@ var base_attack_interval: float = 0.0
 var base_attack_damage: int = 0
 var original_position: Vector2 = Vector2.ZERO
 var hit_flash_tween: Tween = null
+var saved_dash_collision_layer: int = 0
+var saved_dash_collision_mask: int = 0
+var dash_has_hit_player: bool = false
 
 
 func _ready() -> void:
@@ -84,6 +87,8 @@ func _ready() -> void:
 
 
 func _physics_process(_delta: float) -> void:
+	if is_dead:
+		return
 	if is_dashing:
 		return
 	velocity = Vector2.ZERO
@@ -180,6 +185,8 @@ func _perform_titan_dash() -> void:
 		return
 
 	is_dashing = true
+	dash_has_hit_player = false
+
 	var start_pos: Vector2 = global_position
 	var target_pos: Vector2 = player.global_position
 	var dash_dir: Vector2 = start_pos.direction_to(target_pos)
@@ -201,12 +208,23 @@ func _perform_titan_dash() -> void:
 		indicator.default_color = Color(1.0, 0.05, 0.02, 0.9)
 		indicator.width = dash_width
 
-	var dash_time: float = max(0.12, start_pos.distance_to(end_pos) / dash_speed)
-	var tween: Tween = create_tween()
-	tween.tween_property(self, "global_position", end_pos, dash_time).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-	await tween.finished
+	# Disable boss collision during dash so it damages the player without physically pushing them through walls.
+	_disable_dash_collision()
 
+	var dash_time: float = max(0.12, start_pos.distance_to(end_pos) / dash_speed)
+	var elapsed: float = 0.0
+	while elapsed < dash_time:
+		var delta: float = get_process_delta_time()
+		elapsed += delta
+		var t: float = clampf(elapsed / dash_time, 0.0, 1.0)
+		global_position = start_pos.lerp(end_pos, t)
+		_damage_player_on_dash_line(start_pos, global_position)
+		await get_tree().process_frame
+
+	global_position = end_pos
 	_damage_player_on_dash_line(start_pos, end_pos)
+
+	_restore_dash_collision()
 
 	await get_tree().create_timer(0.18, false).timeout
 
@@ -235,6 +253,9 @@ func _create_dash_indicator(start_pos: Vector2, end_pos: Vector2) -> Line2D:
 
 
 func _damage_player_on_dash_line(start_pos: Vector2, end_pos: Vector2) -> void:
+	if dash_has_hit_player:
+		return
+
 	player = get_tree().get_first_node_in_group("player") as Node2D
 	if player == null:
 		return
@@ -243,21 +264,36 @@ func _damage_player_on_dash_line(start_pos: Vector2, end_pos: Vector2) -> void:
 	var dash_len: float = dash_vec.length()
 	if dash_len <= 0.01:
 		return
+
 	var dash_dir: Vector2 = dash_vec.normalized()
 	var projection: float = clampf((player.global_position - start_pos).dot(dash_dir), 0.0, dash_len)
 	var closest: Vector2 = start_pos + dash_dir * projection
 	var distance: float = player.global_position.distance_to(closest)
 
 	if distance <= dash_width:
+		dash_has_hit_player = true
 		if player.has_method("take_damage"):
 			player.take_damage(dash_damage if not is_enraged else int(dash_damage * 1.2))
+		player.global_position = _clamp_to_arena(player.global_position)
 		_screen_shake(16.0, 0.24)
+
+
+func _disable_dash_collision() -> void:
+	saved_dash_collision_layer = collision_layer
+	saved_dash_collision_mask = collision_mask
+	collision_layer = 0
+	collision_mask = 0
+
+
+func _restore_dash_collision() -> void:
+	collision_layer = saved_dash_collision_layer
+	collision_mask = saved_dash_collision_mask
 
 
 func _clamp_to_arena(pos: Vector2) -> Vector2:
 	var scene := get_tree().current_scene
 	if scene and (scene.name == "BossArena" or scene.scene_file_path.ends_with("boss_arena.tscn")):
-		return Vector2(clampf(pos.x, 96.0, 1184.0), clampf(pos.y, 110.0, 650.0))
+		return Vector2(clampf(pos.x, 110.0, 1170.0), clampf(pos.y, 125.0, 635.0))
 	return pos
 
 
@@ -293,7 +329,7 @@ func stun(duration: float) -> void:
 		return
 
 	stun_token += 1
-	var my_token := stun_token
+	var my_token: int = stun_token
 	is_stunned = true
 	if sprite:
 		sprite.modulate = Color(0.45, 1.0, 1.0, 1.0)
@@ -312,6 +348,17 @@ func die() -> void:
 		return
 	is_dead = true
 	_play_boss_death_sound()
+	_screen_shake(22.0, 0.45)
+	_spawn_floating_text("BOSS DEFEATED", Color(1.0, 0.9, 0.25, 1.0), global_position + Vector2(0, -160))
+
+	if sprite:
+		var tween: Tween = create_tween()
+		tween.set_parallel(true)
+		tween.tween_property(sprite, "modulate", Color(2.0, 2.0, 2.0, 1.0), 0.08)
+		tween.tween_property(sprite, "scale", sprite.scale * 1.35, 0.28).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tween.chain().tween_property(sprite, "modulate:a", 0.0, 0.35)
+
+	await get_tree().create_timer(0.65, false).timeout
 	boss_defeated.emit()
 	print("Boss defeated!")
 	queue_free()

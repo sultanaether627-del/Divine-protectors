@@ -21,6 +21,8 @@ const DEBUG_COMBAT := false
 var health := 0.0
 var can_damage := true
 var is_dead := false
+var is_elite := false
+var elite_xp_bonus := 3
 var is_stunned := false
 var saved_collision_layer := 1
 var saved_collision_mask := 1
@@ -141,6 +143,26 @@ func _apply_separation() -> void:
 		velocity += separation * separation_strength
 
 
+
+func make_elite() -> void:
+	if is_elite:
+		return
+	is_elite = true
+	elite_xp_bonus = 3
+	max_health *= 3.0
+	health = max_health
+	damage = int(ceil(float(damage) * 1.35))
+	movement_speed *= 0.92
+	scale *= 1.45
+	xp_drops_on_death += elite_xp_bonus
+	if sprite:
+		sprite.modulate = Color(1.35, 1.15, 0.35, 1.0)
+		var tween: Tween = create_tween()
+		tween.set_loops()
+		tween.tween_property(sprite, "modulate:a", 0.72, 0.45)
+		tween.tween_property(sprite, "modulate:a", 1.0, 0.45)
+
+
 func take_damage(amount: float) -> void:
 	if is_dead:
 		return
@@ -161,13 +183,13 @@ func take_damage_elemental(amount: float, attacker_element: String) -> void:
 		return
 
 	# Look up the damage multiplier for this attacker vs this enemy's element.
-	var multiplier := 1.0
+	var multiplier: float = 1.0
 	if element != "" and attacker_element != "" and ELEMENT_MATCHUPS.has(attacker_element):
 		var row: Dictionary = ELEMENT_MATCHUPS[attacker_element]
 		if row.has(element):
 			multiplier = float(row[element])
 
-	var final_damage := amount * multiplier
+	var final_damage: float = amount * multiplier
 	health -= final_damage
 	_spawn_damage_text(final_damage, multiplier)
 	_flash_hit()
@@ -205,7 +227,10 @@ func _safe_die() -> void:
 	for i in range(xp_drops_on_death):
 		var xp_drop = xp_drop_scene.instantiate()
 		get_tree().current_scene.add_child(xp_drop)
-		xp_drop.global_position = global_position + Vector2(randf_range(-16, 16), randf_range(-16, 16))
+		var burst_dir: Vector2 = Vector2.RIGHT.rotated(randf_range(0.0, TAU))
+		xp_drop.global_position = global_position + burst_dir * randf_range(18.0, 46.0)
+		if xp_drop.has_method("set_initial_burst"):
+			xp_drop.set_initial_burst(burst_dir * randf_range(120.0, 240.0))
 
 	await get_tree().create_timer(0.12, false).timeout
 	queue_free()
@@ -214,17 +239,17 @@ func _safe_die() -> void:
 func _flash_hit() -> void:
 	if sprite:
 		sprite.modulate = Color(3, 3, 3, 1)
-		var restore_color := Color(1, 1, 1, 1)
+		var restore_color: Color = Color(1, 1, 1, 1)
 		if element != "" and ELEMENT_COLORS.has(element):
 			restore_color = ELEMENT_COLORS[element]
-		var tween := create_tween()
+		var tween: Tween = create_tween()
 		tween.tween_property(sprite, "modulate", restore_color, 0.1)
 
 
 func _death_effect() -> void:
 	if sprite:
 		sprite.modulate = Color(1, 0.3, 0.3, 1)
-		var tween := create_tween()
+		var tween: Tween = create_tween()
 		tween.set_parallel(true)
 		tween.tween_property(sprite, "modulate:a", 0.0, 0.15)
 		tween.tween_property(sprite, "scale", Vector2(1.3, 1.3), 0.15)
@@ -234,7 +259,7 @@ func apply_push_from(origin: Vector2, push_distance: float) -> void:
 	if is_dead:
 		return
 
-	var push_dir := origin.direction_to(global_position)
+	var push_dir: Vector2 = origin.direction_to(global_position)
 	if push_dir == Vector2.ZERO:
 		push_dir = Vector2.RIGHT.rotated(randf_range(0.0, TAU))
 
@@ -246,7 +271,7 @@ func stun(duration: float) -> void:
 		return
 
 	stun_token += 1
-	var my_token := stun_token
+	var my_token: int = stun_token
 	is_stunned = true
 	velocity = Vector2.ZERO
 
@@ -283,10 +308,10 @@ func stun(duration: float) -> void:
 
 func _enemy_spawn_polish() -> void:
 	if sprite:
-		var original_scale := sprite.scale
+		var original_scale: Vector2 = sprite.scale
 		sprite.scale = original_scale * 0.75
 		sprite.modulate.a = 0.35
-		var tween := create_tween()
+		var tween: Tween = create_tween()
 		tween.set_parallel(true)
 		tween.tween_property(sprite, "scale", original_scale, 0.2).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		tween.tween_property(sprite, "modulate:a", 1.0, 0.18)
@@ -324,9 +349,9 @@ func _screen_shake(strength: float, duration: float) -> void:
 func _death_pop_polish() -> void:
 	if sprite == null:
 		return
-	if scale.x >= 1.8 or max_health >= 100.0:
-		_screen_shake(4.0, 0.12)
-	var tween := create_tween()
+	if is_elite or scale.x >= 1.8 or max_health >= 100.0:
+		_screen_shake(6.0 if is_elite else 4.0, 0.14)
+	var tween: Tween = create_tween()
 	tween.set_parallel(true)
 	tween.tween_property(sprite, "scale", sprite.scale * 1.25, 0.08).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	tween.tween_property(sprite, "modulate:a", 0.0, 0.18)

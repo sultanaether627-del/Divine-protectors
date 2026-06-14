@@ -22,6 +22,8 @@ const DEBUG_SPAWN := false
 @export var enemy_damage_growth_per_minute: float = 0.06
 @export var enemy_speed_growth_per_minute: float = 0.035
 @export var max_enemy_health_multiplier: float = 4.0
+@export var elite_spawn_chance: float = 0.06
+@export var elite_unlock_time: float = 120.0
 
 
 @export var clamp_spawn_to_rect: bool = true
@@ -119,12 +121,31 @@ func spawn_enemy() -> void:
 
 	enemy.process_mode = Node.PROCESS_MODE_PAUSABLE
 	_apply_enemy_scaling(enemy)
+	_try_make_elite(enemy)
 
 	get_tree().current_scene.add_child(enemy)
 
 	var spawn_pos: Vector2 = _get_spawn_position()
 	enemy.global_position = spawn_pos
 
+
+
+
+func _try_make_elite(enemy: Node) -> void:
+	if elapsed_game_time < elite_unlock_time:
+		return
+
+	var chance: float = elite_spawn_chance
+	var difficulty_name: String = DifficultyManager.get_difficulty_name()
+	if difficulty_name == "Hard":
+		chance *= 1.35
+	elif difficulty_name == "Divine":
+		chance *= 1.75
+	elif difficulty_name == "Easy":
+		chance *= 0.65
+
+	if randf() <= chance and enemy.has_method("make_elite"):
+		enemy.make_elite()
 
 
 func _apply_enemy_scaling(enemy: Node) -> void:
@@ -141,7 +162,7 @@ func _apply_enemy_scaling(enemy: Node) -> void:
 		damage_mult = 1.0 + minutes_alive * enemy_damage_growth_per_minute
 	else:
 		# Post-first-defeat — DPS-aware scaling so upgraded players stay challenged.
-		var player_node := get_tree().get_first_node_in_group("player")
+		var player_node: Node = get_tree().get_first_node_in_group("player")
 		var player_lv: int = 1
 		var player_dps: float = 15.0
 		if player_node:

@@ -63,7 +63,7 @@ func _update_music_for_scene() -> void:
 func _get_music_group(scene_path: String) -> String:
 	if scene_path == "":
 		return "menu"
-	if scene_path.ends_with("boss_arena.tscn"):
+	if scene_path.ends_with("boss_arena.tscn") or get_tree().has_meta("force_boss_music"):
 		return "boss"
 	if scene_path.ends_with("world.tscn"):
 		return "world"

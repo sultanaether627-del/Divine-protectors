@@ -45,6 +45,7 @@ var tile_scale: float = 0.5
 
 
 func _ready() -> void:
+	get_tree().set_meta("force_boss_music", true)
 	_build_arena_visuals()
 	# Ensure the game is never paused when entering the boss arena.
 	# A pending level-up upgrade choice or pause state from the world scene
