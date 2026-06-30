@@ -1,0 +1,6 @@
+Boss dash no-push fix:
+- Boss body collision layer/mask is disabled during dash.
+- Boss CollisionShape2D is disabled during dash.
+- Collision stays disabled during the return to original position.
+- Collision restores only after dash + return complete.
+- Dash damage logic remains unchanged.

@@ -1,15 +1,13 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=3 format=3 uid="uid://gl4wgj3rcwai"]
 
 [ext_resource type="Script" path="res://scripts/ult_area.gd" id="1_script"]
-[ext_resource type="Texture2D" path="res://sprites/earth_ult.png" id="2_tex"]
+[ext_resource type="Texture2D" uid="uid://bj4o1ywh6ro6w" path="res://sprites/earth ult.png" id="2_gwfyd"]
 
 [node name="EarthUlt" type="Node2D"]
 script = ExtResource("1_script")
 ult_type = "earth"
-radius = 150.0
-stun_duration = 5.0
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture_filter = 1
 scale = Vector2(2.35, 2.35)
-texture = ExtResource("2_tex")
+texture = ExtResource("2_gwfyd")

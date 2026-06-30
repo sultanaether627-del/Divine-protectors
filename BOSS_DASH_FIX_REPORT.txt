@@ -1,0 +1,13 @@
+BOSS DASH FIX REPORT
+
+Fixed:
+- Boss dash no longer physically pushes the player through the arena walls.
+- Boss collision is temporarily disabled during the dash movement.
+- Dash damage is checked continuously during the dash, not only at the end.
+- Player takes dash damage if caught in the red dash path.
+- Player is clamped back inside the boss arena after dash hit.
+- Boss timer was intentionally NOT changed.
+
+Validation:
+- Missing resources: none found.
+- Conflict markers: none found.

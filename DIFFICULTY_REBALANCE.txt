@@ -1,0 +1,5 @@
+Difficulty rebalance applied:
+Easy 0.75x hp/dmg, 1.25x XP
+Medium baseline
+Hard 1.4x hp, 1.35x dmg, 1.15x speed/spawn
+Divine 2x hp, 1.75x dmg, 1.3x speed/spawn, 0.75x XP

@@ -16,18 +16,18 @@ signal form_changed(form_name: String)
 @export var healing_per_orb := 5
 @export var bullet_damage := 10.0
 @export var character_revive_time := 60.0
-<<<<<<< HEAD
-@export var ult_charge_time := 90.0
-@export var shoot_sound: AudioStream = preload("res://audio/sfx/player/magical_1.ogg")
 
-# Ultimate sound effects using available resources
-@export var water_ult_sound: AudioStream = preload("res://audio/sfx/player/yodguard-healing-magic-6-378666.mp3")
-@export var fire_ult_sound: AudioStream = preload("res://audio/sfx/player/rescopicsound-elemental-magic-spell-impact-outgoing-228342.mp3")
-@export var earth_ult_sound: AudioStream = preload("res://audio/sfx/player/rescopicsound-elemental-magic-spell-impact-outgoing-228342.mp3")
-@export var wind_ult_sound: AudioStream = preload("res://audio/sfx/player/rescopicsound-elemental-magic-spell-impact-outgoing-228342.mp3")
-=======
-@export var ult_charge_time := 1.0
->>>>>>> 018d298ad5fb11dfce127b249b5eca0f6dee11ef
+@export var ult_charge_time := 10.0
+
+
+@export var level_up_sound: AudioStream = preload("res://audio/sfx/ui/level_up.wav")
+@export var ult_ready_sound: AudioStream = preload("res://audio/sfx/ui/ult_ready.wav")
+@export var upgrade_select_sound: AudioStream = preload("res://audio/sfx/ui/button_click.wav")
+@export var water_ult_sound: AudioStream = preload("res://audio/sfx/player/ult_water.wav")
+@export var fire_ult_sound: AudioStream = preload("res://audio/sfx/player/ult_fire.wav")
+@export var earth_ult_sound: AudioStream = preload("res://audio/sfx/player/ult_earth.wav")
+@export var wind_ult_sound: AudioStream = preload("res://audio/sfx/player/ult_wind.wav")
+
 
 var pickup_range := 180.0
 var armor := 0.0
@@ -47,6 +47,10 @@ var xp_multiplier := 1.0
 @export var wind_ult_scene: PackedScene = preload("res://tscn/ults/wind_ult.tscn")
 
 @onready var forms_root: Node2D = $FormsRoot
+@onready var sfx_player: AudioStreamPlayer = AudioStreamPlayer.new()
+
+@export var swap_effect_scene: PackedScene = preload("res://tscn/swap_effect.tscn")
+@export var floating_text_scene: PackedScene = preload("res://tscn/floating_text.tscn")
 
 var can_shoot := true
 var level := 1
@@ -61,9 +65,25 @@ var form_stats: Dictionary = {}
 var active_form_key := "water"
 var active_form: Node = null
 
+var element_colors := {
+	"water": Color(0.35, 0.75, 1.0, 1.0),
+	"fire": Color(1.0, 0.35, 0.15, 1.0),
+	"earth": Color(0.55, 0.35, 0.16, 1.0),
+	"wind": Color(0.55, 1.0, 0.65, 1.0)
+}
+
+var element_identity_stats := {
+	"water": {"damage": 0.95, "speed": 1.0, "armor": 1.10, "healing": 1.25},
+	"fire": {"damage": 1.18, "speed": 1.0, "armor": 1.0, "healing": 1.0},
+	"earth": {"damage": 1.0, "speed": 0.90, "armor": 1.25, "healing": 1.0},
+	"wind": {"damage": 0.92, "speed": 1.18, "armor": 0.95, "healing": 1.0}
+}
+
 
 func _ready() -> void:
 	add_to_group("player")
+	add_child(sfx_player)
+	sfx_player.bus = "Master"
 	xp_required = starting_xp_required
 
 	form_scenes = {
@@ -81,7 +101,9 @@ func _ready() -> void:
 	}
 
 	_build_form_stats()
-	switch_form("water", true)
+	var start_form: String = get_tree().get_meta("player_active_form_key", "water") as String
+	_restore_stats_from_meta()
+	switch_form(start_form, true)
 	xp_changed.emit(current_xp, xp_required, level)
 	level_changed.emit(level, current_xp, xp_required)
 
@@ -95,7 +117,7 @@ func _build_form_stats() -> void:
 		var scene: PackedScene = form_scenes[key]
 		if scene == null:
 			continue
-		var preview = scene.instantiate()
+		var preview: Node = scene.instantiate()
 		var display_name: String = str(preview.get("display_name"))
 		var max_hp: int = int(preview.get("base_max_health"))
 		preview.free()
@@ -109,6 +131,53 @@ func _build_form_stats() -> void:
 			"ult_charge": 0.0,
 			"ult_ready": false
 		}
+
+
+func _restore_stats_from_meta() -> void:
+	# If the player arrived via the boss-fight transition, SceneTree metadata
+	# holds all the stats that were saved just before the scene swap.
+	# Read them back and then clear the keys so a fresh run starts clean.
+	if not get_tree().has_meta("player_level"):
+		return  # Normal fresh start — nothing to restore.
+
+	level          = int(get_tree().get_meta("player_level", level))
+	current_xp     = int(get_tree().get_meta("player_current_xp", current_xp))
+	xp_required    = int(get_tree().get_meta("player_xp_required", xp_required))
+	bullet_damage  = float(get_tree().get_meta("player_bullet_damage", bullet_damage))
+	movement_speed = float(get_tree().get_meta("player_movement_speed", movement_speed))
+	shoot_cooldown = float(get_tree().get_meta("player_shoot_cooldown", shoot_cooldown))
+	armor          = float(get_tree().get_meta("player_armor", armor))
+	pickup_range   = float(get_tree().get_meta("player_pickup_range", pickup_range))
+	projectile_speed_mult = float(get_tree().get_meta("player_projectile_speed_mult", projectile_speed_mult))
+	projectile_size_mult  = float(get_tree().get_meta("player_projectile_size_mult", projectile_size_mult))
+	multi_shot_count      = int(get_tree().get_meta("player_multi_shot_count", multi_shot_count))
+	xp_multiplier         = float(get_tree().get_meta("player_xp_multiplier", xp_multiplier))
+	healing_per_orb       = int(get_tree().get_meta("player_healing_per_orb", healing_per_orb))
+	ult_charge_time       = float(get_tree().get_meta("player_ult_charge_time", ult_charge_time))
+
+	# Restore per-form HP (max_health drives the health bar scale, health is current HP).
+	var saved_form_health = get_tree().get_meta("player_form_health", {})
+	if typeof(saved_form_health) == TYPE_DICTIONARY:
+		for key in saved_form_health:
+			if form_stats.has(key):
+				var entry: Dictionary = saved_form_health[key]
+				form_stats[key]["max_health"] = int(entry.get("max_health", form_stats[key]["max_health"]))
+				form_stats[key]["health"]     = int(entry.get("health", form_stats[key]["health"]))
+				# Revive any knocked-out forms so the player enters the boss fight fresh.
+				form_stats[key]["dead"]       = false
+				form_stats[key]["revive_left"] = 0.0
+
+	# Clear all saved metadata so a future fresh run is unaffected.
+	for meta_key in [
+		"player_level", "player_current_xp", "player_xp_required",
+		"player_bullet_damage", "player_movement_speed", "player_shoot_cooldown",
+		"player_armor", "player_pickup_range", "player_projectile_speed_mult",
+		"player_projectile_size_mult", "player_multi_shot_count", "player_xp_multiplier",
+		"player_healing_per_orb", "player_ult_charge_time", "player_active_form_key",
+		"player_form_health"
+	]:
+		if get_tree().has_meta(meta_key):
+			get_tree().remove_meta(meta_key)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -140,7 +209,7 @@ func movement() -> void:
 	var input_dir := Vector2(x_mov, y_mov)
 
 	if active_form and active_form.has_method("set_facing"):
-		var aim_dir := global_position.direction_to(get_global_mouse_position())
+		var aim_dir: Vector2 = global_position.direction_to(get_global_mouse_position())
 		active_form.set_facing(aim_dir.x)
 
 	var target_velocity := input_dir.normalized() * movement_speed
@@ -159,12 +228,20 @@ func animate_player() -> void:
 		var walking_backwards := false
 
 		if moving:
-			var aim_dir := global_position.direction_to(get_global_mouse_position())
+			var aim_dir: Vector2 = global_position.direction_to(get_global_mouse_position())
 			var move_dir := velocity.normalized()
 			if aim_dir != Vector2.ZERO:
 				walking_backwards = move_dir.dot(aim_dir.normalized()) < 0.0
 
 		active_form.play_movement(moving, walking_backwards)
+
+
+
+func _element_stat(stat_name: String, fallback: float = 1.0) -> float:
+	if element_identity_stats.has(active_form_key):
+		var data: Dictionary = element_identity_stats[active_form_key]
+		return float(data.get(stat_name, fallback))
+	return fallback
 
 
 func shooting() -> void:
@@ -185,12 +262,14 @@ func shooting() -> void:
 
 	can_shoot = false
 
-	var aim_dir := global_position.direction_to(get_global_mouse_position())
+	SFXManager.play_shoot(active_form_key)
+
+	var aim_dir: Vector2 = global_position.direction_to(get_global_mouse_position())
 	if aim_dir == Vector2.ZERO:
 		aim_dir = Vector2.RIGHT
 
 	for shot in range(multi_shot_count):
-		var bullet = current_bullet_scene.instantiate()
+		var bullet: Node = current_bullet_scene.instantiate()
 		get_tree().current_scene.add_child(bullet)
 
 		if active_form.has_method("get_shot_position"):
@@ -198,38 +277,21 @@ func shooting() -> void:
 		else:
 			bullet.global_position = global_position
 
-		var spread_angle := 0.0
+		var spread_angle: float = 0.0
 		if multi_shot_count > 1:
 			spread_angle = deg_to_rad(8.0) * (shot - (multi_shot_count - 1) / 2.0)
-		var shot_dir := aim_dir.rotated(spread_angle)
+		var shot_dir: Vector2 = aim_dir.rotated(spread_angle)
 		bullet.direction = shot_dir
-		bullet.damage = bullet_damage
+		bullet.damage = bullet_damage * _element_stat("damage", 1.0)
 		bullet.rotation = shot_dir.angle()
-		bullet.speed_mult = projectile_speed_mult
+		bullet.speed_mult = projectile_speed_mult * _element_stat("speed", 1.0)
 		bullet.size_mult = projectile_size_mult
-
-	_play_shoot_sound()
-	
-	
-
-	
+		# Tell the bullet which element fired it for elemental weakness calc.
+		if bullet.get("bullet_element") != null:
+			bullet.bullet_element = active_form_key
 
 	await get_tree().create_timer(shoot_cooldown).timeout
 	can_shoot = true
-
-
-func _play_shoot_sound() -> void:
-	if shoot_sound == null:
-		return
-
-	var audio_player: AudioStreamPlayer = AudioStreamPlayer.new()
-	audio_player.stream = shoot_sound
-	audio_player.volume_db = -14.0
-	audio_player.pitch_scale = 1.0 + randf_range(-0.1, 0.1)
-
-	get_tree().current_scene.add_child(audio_player)
-	audio_player.play()
-	audio_player.finished.connect(audio_player.queue_free)
 
 
 func switch_form(form_key: String, force := false) -> void:
@@ -238,11 +300,13 @@ func switch_form(form_key: String, force := false) -> void:
 	if form_key == active_form_key and not force:
 		return
 	if form_stats.has(form_key) and bool(form_stats[form_key]["dead"]):
+		_spawn_floating_text("%s DOWN" % str(form_stats[form_key]["display"]), Color(1.0, 0.25, 0.25, 1.0), global_position + Vector2(0, -70))
 		if DEBUG_COMBAT:
 			print(form_stats[form_key]["display"], " is knocked out. Revive left: ", int(ceil(float(form_stats[form_key]["revive_left"]))), "s")
 		return
 
 	if active_form:
+		_play_swap_effect(active_form_key)
 		active_form.queue_free()
 		active_form = null
 
@@ -251,7 +315,9 @@ func switch_form(form_key: String, force := false) -> void:
 	forms_root.add_child(active_form)
 	active_form.position = Vector2.ZERO
 
-	_play_form_switch_sound()
+	_play_swap_effect(active_form_key)
+	_spawn_floating_text(str(form_stats[active_form_key]["display"]), element_colors.get(active_form_key, Color.WHITE), global_position + Vector2(0, -78))
+
 	_emit_health()
 	form_changed.emit(form_stats[active_form_key]["display"])
 	if DEBUG_COMBAT:
@@ -266,11 +332,11 @@ func take_damage(amount: int) -> void:
 	if is_active_form_dead():
 		return
 
-	var reduced := int(ceil(float(amount) * (1.0 - armor)))
+	var total_armor: float = clampf(armor + (_element_stat("armor", 1.0) - 1.0), 0.0, 0.75)
+	var reduced := int(ceil(float(amount) * (1.0 - total_armor)))
 	form_stats[active_form_key]["health"] = int(clamp(int(form_stats[active_form_key]["health"]) - reduced, 0, int(form_stats[active_form_key]["max_health"])))
 	_emit_health()
 	
-	_play_hit_sound()
 	_shake_camera(4.0, 0.08)
 	
 	if DEBUG_COMBAT:
@@ -283,7 +349,8 @@ func take_damage(amount: int) -> void:
 func heal(amount: int) -> void:
 	if is_active_form_dead():
 		return
-	form_stats[active_form_key]["health"] = int(clamp(int(form_stats[active_form_key]["health"]) + amount, 0, int(form_stats[active_form_key]["max_health"])))
+	var final_heal: int = int(ceil(float(amount) * _element_stat("healing", 1.0)))
+	form_stats[active_form_key]["health"] = int(clamp(int(form_stats[active_form_key]["health"]) + final_heal, 0, int(form_stats[active_form_key]["max_health"])))
 	_emit_health()
 	if DEBUG_COMBAT:
 		print("Healed ", form_stats[active_form_key]["display"], ": +", amount, " HP: ", form_stats[active_form_key]["health"], "/", form_stats[active_form_key]["max_health"])
@@ -397,7 +464,7 @@ func _make_upgrade_options() -> Array:
 
 
 func apply_upgrade(upgrade_type: String, percent: int) -> void:
-	var multiplier := 1.0 + float(percent) / 100.0
+	var multiplier: float = 1.0 + float(percent) / 100.0
 
 	match upgrade_type:
 		"fire_rate":
@@ -439,7 +506,7 @@ func _shake_camera(strength: float, duration: float) -> void:
 	var camera: Camera2D = $Camera2D
 	if camera:
 		var original_offset := camera.offset
-		var tween := create_tween()
+		var tween: Tween = create_tween()
 		var steps := int(duration / 0.02)
 		for _i in range(steps):
 			tween.tween_callback(func():
@@ -450,10 +517,12 @@ func _shake_camera(strength: float, duration: float) -> void:
 
 
 func _level_up_effect() -> void:
-	_play_level_up_sound()
+	_play_sfx(level_up_sound)
+	_screen_shake(5.0, 0.14)
+	_spawn_floating_text("LEVEL UP!", Color(1.0, 0.88, 0.25, 1.0), global_position + Vector2(0, -90))
 	if active_form and active_form.has_node("AnimatedSprite2D"):
 		var s: AnimatedSprite2D = active_form.get_node("AnimatedSprite2D")
-		var tween := create_tween()
+		var tween: Tween = create_tween()
 		tween.set_parallel(true)
 		tween.tween_property(s, "modulate", Color(1.5, 1.5, 2.0, 1), 0.1)
 		tween.tween_property(s, "scale", Vector2(1.15, 1.15), 0.1)
@@ -462,6 +531,59 @@ func _level_up_effect() -> void:
 		tween.tween_property(s, "scale", Vector2(1, 1), 0.2)
 	
 	_shake_camera(2.0, 0.06)
+
+
+
+
+func _play_sfx(stream: AudioStream) -> void:
+	if stream == null:
+		return
+	var audio := AudioStreamPlayer.new()
+	audio.stream = stream
+	audio.bus = "Master"
+	audio.process_mode = Node.PROCESS_MODE_ALWAYS
+	get_tree().current_scene.add_child(audio)
+	audio.play()
+	audio.finished.connect(audio.queue_free)
+
+
+func _screen_shake(strength: float, duration: float) -> void:
+	var shaker: Node = get_tree().get_first_node_in_group("screen_shake")
+	if shaker and shaker.has_method("shake"):
+		shaker.shake(strength, duration)
+
+
+func _play_ult_sfx(element_key: String) -> void:
+	match element_key:
+		"water":
+			_play_sfx(water_ult_sound)
+		"fire":
+			_play_sfx(fire_ult_sound)
+		"earth":
+			_play_sfx(earth_ult_sound)
+		"wind":
+			_play_sfx(wind_ult_sound)
+		_:
+			pass
+
+
+func _play_swap_effect(form_key: String) -> void:
+	if swap_effect_scene == null:
+		return
+	var effect = swap_effect_scene.instantiate()
+	get_tree().current_scene.add_child(effect)
+	effect.global_position = global_position + Vector2(0, -14)
+	effect.element_color = element_colors.get(form_key, Color.WHITE)
+
+
+func _spawn_floating_text(text: String, color: Color, world_position: Vector2) -> void:
+	if floating_text_scene == null:
+		return
+	var popup = floating_text_scene.instantiate()
+	get_tree().current_scene.add_child(popup)
+	popup.global_position = world_position
+	popup.text = text
+	popup.color = color
 
 
 func _update_active_ult_charge(delta: float) -> void:
@@ -488,6 +610,14 @@ func cast_ult() -> void:
 		if DEBUG_COMBAT:
 			print(form_stats[active_form_key]["display"], " ult is not ready yet.")
 		return
+
+	if active_form_key == "wind":
+		_play_ult_sfx(active_form_key)
+		_screen_shake(7.0, 0.18)
+		_cast_wind_dash_ult()
+		_reset_active_ult()
+		return
+
 	if not ult_scenes.has(active_form_key):
 		return
 
@@ -495,21 +625,98 @@ func cast_ult() -> void:
 	if ult_scene == null:
 		return
 
-	_play_ult_sound()
 	var ult = ult_scene.instantiate()
-
-	
-	
-	
 	ult.global_position = global_position + Vector2(0, 26)
-	ult.z_index = -50
+	ult.z_index = -2
+	ult.z_as_relative = false
 
 	get_tree().current_scene.add_child(ult)
+	_play_ult_sfx(active_form_key)
+	_screen_shake(8.0, 0.2)
 
-	form_stats[active_form_key]["ult_charge"] = 0.0
-	form_stats[active_form_key]["ult_ready"] = false
+	_reset_active_ult()
 	if DEBUG_COMBAT:
 		print("CAST ULT: ", form_stats[active_form_key]["display"])
+
+
+func _reset_active_ult() -> void:
+	form_stats[active_form_key]["ult_charge"] = 0.0
+	form_stats[active_form_key]["ult_ready"] = false
+
+
+func _cast_wind_dash_ult() -> void:
+	var aim_dir: Vector2 = global_position.direction_to(get_global_mouse_position())
+	if aim_dir.length() <= 0.01:
+		aim_dir = Vector2.RIGHT
+
+	var dash_distance: float = 650.0
+	var dash_width: float = 120.0
+	var start_pos: Vector2 = global_position
+	var end_pos: Vector2 = start_pos + aim_dir.normalized() * dash_distance
+	end_pos = _clamp_dash_end_position(end_pos)
+
+	_kill_enemies_along_dash(start_pos, end_pos, dash_width)
+
+	var tween: Tween = create_tween()
+	tween.tween_property(self, "global_position", end_pos, 0.18).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	_play_wind_dash_fx(start_pos, end_pos)
+
+
+
+func _clamp_dash_end_position(end_pos: Vector2) -> Vector2:
+	var scene := get_tree().current_scene
+	if scene == null:
+		return end_pos
+
+	# Boss arena bounds from boss_arena.tscn walls.
+	if scene.name == "BossArena" or scene.scene_file_path.ends_with("boss_arena.tscn"):
+		return Vector2(
+			clampf(end_pos.x, 96.0, 1184.0),
+			clampf(end_pos.y, 110.0, 650.0)
+		)
+
+	return end_pos
+
+
+func _kill_enemies_along_dash(start_pos: Vector2, end_pos: Vector2, width: float) -> void:
+	var dash_vec: Vector2 = end_pos - start_pos
+	var dash_len: float = dash_vec.length()
+	if dash_len <= 0.01:
+		return
+
+	var dash_dir: Vector2 = dash_vec.normalized()
+
+	for enemy in get_tree().get_nodes_in_group("enemy"):
+		if enemy == null or not is_instance_valid(enemy) or not (enemy is Node2D):
+			continue
+
+		var enemy_node: Node2D = enemy as Node2D
+		var enemy_pos: Vector2 = enemy_node.global_position
+		var projection: float = clampf((enemy_pos - start_pos).dot(dash_dir), 0.0, dash_len)
+		var closest: Vector2 = start_pos + dash_dir * projection
+		var distance: float = enemy_pos.distance_to(closest)
+
+		if distance <= width:
+			if enemy.has_method("kill_without_xp"):
+				enemy.kill_without_xp()
+			elif enemy.has_method("die"):
+				enemy.die()
+
+
+func _play_wind_dash_fx(start_pos: Vector2, end_pos: Vector2) -> void:
+	var line := Line2D.new()
+	line.width = 12.0
+	line.default_color = Color(0.55, 1.0, 0.65, 0.75)
+	line.z_index = 120
+	line.z_as_relative = false
+	line.add_point(start_pos)
+	line.add_point(end_pos)
+	get_tree().current_scene.add_child(line)
+
+	var tween: Tween = create_tween()
+	tween.tween_property(line, "modulate:a", 0.0, 0.28)
+	tween.tween_callback(Callable(line, "queue_free"))
 
 
 func apply_water_ult() -> void:
@@ -523,46 +730,3 @@ func apply_water_ult() -> void:
 	_emit_health()
 	if DEBUG_COMBAT:
 		print("Water ult: all characters fully healed and revived.")
-
-
-func _play_form_switch_sound() -> void:
-	var sfx_manager = get_node_or_null("/root/SFXManager")
-	if sfx_manager and sfx_manager.has_method("play_form_switch"):
-		sfx_manager.play_form_switch()
-
-
-func _play_ult_sound() -> void:
-	var ult_sound: AudioStream = null
-	
-	match active_form_key:
-		"water":
-			ult_sound = water_ult_sound
-		"fire":
-			ult_sound = fire_ult_sound
-		"earth":
-			ult_sound = earth_ult_sound
-		"wind":
-			ult_sound = wind_ult_sound
-	
-	if ult_sound == null:
-		return
-	
-	var audio_player = AudioStreamPlayer.new()
-	audio_player.stream = ult_sound
-	audio_player.volume_db = 0.0
-	audio_player.pitch_scale = 1.0
-	
-	get_tree().current_scene.add_child(audio_player)
-	audio_player.play()
-
-
-func _play_hit_sound() -> void:
-	var sfx_manager = get_node_or_null("/root/SFXManager")
-	if sfx_manager and sfx_manager.has_method("play_player_hit"):
-		sfx_manager.play_player_hit()
-
-
-func _play_level_up_sound() -> void:
-	var sfx_manager = get_node_or_null("/root/SFXManager")
-	if sfx_manager and sfx_manager.has_method("play_level_up"):
-		sfx_manager.play_level_up()

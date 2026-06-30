@@ -1,0 +1,28 @@
+BOSS MECHANICS + UI FIX REPORT
+
+Implemented:
+- 1-shot parry: one bullet now reflects the boss projectile.
+- Reflect projectile still turns cyan, returns to boss, damages and stuns him.
+- Titan Dash boss mechanic:
+  - Red line telegraph/indicator.
+  - Boss dashes along the line.
+  - Player takes damage if caught in the dash path.
+  - Boss returns to original position after the dash.
+- Double Fist Combo:
+  - Below enrage, boss uses normal fist attacks.
+  - During enrage, boss throws two fists with a short gap.
+- Enrage Phase:
+  - Triggers at 50% HP.
+  - Boss turns red-tinted.
+  - Attack interval, projectile interval, and dash interval get faster.
+  - Shows floating text: THE TITAN IS ENRAGED.
+- Wind dash arena barrier fix retained.
+- Difficulty rebalance retained.
+- UI consistency pass:
+  - Boss HP bar restyled to match dark/cyan HUD.
+  - Boss intro restyled to match same UI direction.
+  - Boss HP has title text, no numbers.
+
+Validation:
+- Missing resources found: none.
+- Conflict markers found: none.
