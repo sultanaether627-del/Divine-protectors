@@ -1,0 +1,32 @@
+BOSS PARRY + FULL CHANGES REPORT
+
+Implemented from the boss mechanics discussion:
+
+1. Shoot-to-parry boss projectile
+- Added tscn/boss_reflect_projectile.tscn
+- Added scripts/boss_reflect_projectile.gd
+- Boss fires a red projectile every 12 seconds.
+- Player bullets damage the projectile.
+- When enough shots hit it, the projectile turns cyan and reflects back to the boss.
+- Reflected projectile damages the boss and stuns him for 3 seconds.
+- If the player fails and it reaches them, they take damage.
+- Difficulty affects projectile HP:
+  Easy 15 HP, Normal/Medium 20 HP, Hard 30 HP, Divine 40 HP.
+
+2. Boss stun
+- Boss now has a stun(duration) method.
+- Reflected projectile uses this to stop attacks briefly.
+
+3. Bullet compatibility
+- Player bullets can now target boss_reflect_projectile nodes.
+
+4. Wind dash arena fix
+- Wind dash endpoint is clamped inside boss arena bounds.
+- This prevents dashing through the boss arena barrier.
+
+5. Existing difficulty rebalance retained.
+6. Existing polish/boss intro/screen-shake fixes retained from the source project.
+
+Static validation:
+- Missing resource paths: none found.
+- Conflict markers: none found.

@@ -1,0 +1,687 @@
+[gd_scene load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://scripts/bottom_hud.gd" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="Style_Bar"]
+bg_color = Color(0.018, 0.022, 0.038, 0.88)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.55, 0.68, 0.85, 0.22)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 10
+content_margin_left = 10
+content_margin_top = 8
+content_margin_right = 10
+content_margin_bottom = 8
+
+[sub_resource type="StyleBoxFlat" id="Style_Section"]
+bg_color = Color(0.032, 0.038, 0.062, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.95, 0.95, 1, 0.1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+content_margin_left = 8
+content_margin_top = 8
+content_margin_right = 8
+content_margin_bottom = 8
+
+[sub_resource type="StyleBoxFlat" id="Style_Slot"]
+bg_color = Color(0.035, 0.04, 0.065, 0.92)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 0.11)
+corner_radius_top_left = 9
+corner_radius_top_right = 9
+corner_radius_bottom_right = 9
+corner_radius_bottom_left = 9
+
+[sub_resource type="StyleBoxFlat" id="Style_HPBG"]
+bg_color = Color(0.06, 0.07, 0.09, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="Style_HPFill"]
+bg_color = Color(0.45, 0.78, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="Style_XPBG"]
+bg_color = Color(0.08, 0.09, 0.12, 0.95)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="Style_XPFill"]
+bg_color = Color(0.78, 0.86, 1, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="Style_SlotChargeBG"]
+bg_color = Color(0.08, 0.09, 0.12, 0.95)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="Style_SlotChargeFill"]
+bg_color = Color(0.78, 0.86, 1, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[node name="BottomHUD" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_script")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TopLeftElements" type="PanelContainer" parent="Root"]
+layout_mode = 1
+offset_left = 24.0
+offset_top = 24.0
+offset_right = 270.0
+offset_bottom = 102.0
+theme_override_styles/panel = SubResource("Style_Bar")
+
+[node name="ElementsMargin" type="MarginContainer" parent="Root/TopLeftElements"]
+layout_mode = 2
+
+[node name="ElementsVBox" type="VBoxContainer" parent="Root/TopLeftElements/ElementsMargin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="ElementsTitleRow" type="HBoxContainer" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox"]
+layout_mode = 2
+
+[node name="ElementsTitle" type="Label" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox/ElementsTitleRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
+text = "ELEMENTS"
+
+[node name="SwapHint" type="Label" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox/ElementsTitleRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+modulate = Color(0.84, 0.88, 1, 0.68)
+text = "1-4"
+horizontal_alignment = 2
+
+[node name="FormsRow" type="HBoxContainer" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Slot1" type="PanelContainer" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox/FormsRow"]
+custom_minimum_size = Vector2(46, 46)
+layout_mode = 2
+theme_override_styles/panel = SubResource("Style_Slot")
+
+[node name="Glow" type="ColorRect" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox/FormsRow/Slot1"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+color = Color(1, 0.85, 0.25, 0.14)
+
+[node name="Icon" type="TextureRect" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox/FormsRow/Slot1"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -17.0
+offset_top = -17.0
+offset_right = 17.0
+offset_bottom = 17.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ReadyFX" type="TextureRect" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox/FormsRow/Slot1"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -22.0
+offset_top = -22.0
+offset_right = 22.0
+offset_bottom = 22.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5
+modulate = Color(1, 0.82, 0.2, 0.14)
+
+[node name="DeadOverlay" type="ColorRect" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox/FormsRow/Slot1"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.64)
+
+[node name="ChargeBar" type="ProgressBar" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox/FormsRow/Slot1"]
+custom_minimum_size = Vector2(0, 3)
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = -6.0
+offset_right = -4.0
+offset_bottom = -3.0
+show_percentage = false
+theme_override_styles/background = SubResource("Style_SlotChargeBG")
+theme_override_styles/fill = SubResource("Style_SlotChargeFill")
+
+[node name="StatusLabel" type="Label" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox/FormsRow/Slot1"]
+visible = false
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -17.0
+offset_bottom = -3.0
+theme_override_font_sizes/font_size = 9
+text = "KO"
+horizontal_alignment = 1
+
+[node name="Slot2" type="PanelContainer" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox/FormsRow"]
+custom_minimum_size = Vector2(46, 46)
+layout_mode = 2
+theme_override_styles/panel = SubResource("Style_Slot")
+
+[node name="Glow" type="ColorRect" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox/FormsRow/Slot2"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+color = Color(1, 0.85, 0.25, 0.14)
+
+[node name="Icon" type="TextureRect" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox/FormsRow/Slot2"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -17.0
+offset_top = -17.0
+offset_right = 17.0
+offset_bottom = 17.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ReadyFX" type="TextureRect" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox/FormsRow/Slot2"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -22.0
+offset_top = -22.0
+offset_right = 22.0
+offset_bottom = 22.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5
+modulate = Color(1, 0.82, 0.2, 0.14)
+
+[node name="DeadOverlay" type="ColorRect" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox/FormsRow/Slot2"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.64)
+
+[node name="ChargeBar" type="ProgressBar" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox/FormsRow/Slot2"]
+custom_minimum_size = Vector2(0, 3)
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = -6.0
+offset_right = -4.0
+offset_bottom = -3.0
+show_percentage = false
+theme_override_styles/background = SubResource("Style_SlotChargeBG")
+theme_override_styles/fill = SubResource("Style_SlotChargeFill")
+
+[node name="StatusLabel" type="Label" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox/FormsRow/Slot2"]
+visible = false
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -17.0
+offset_bottom = -3.0
+theme_override_font_sizes/font_size = 9
+text = "KO"
+horizontal_alignment = 1
+
+[node name="Slot3" type="PanelContainer" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox/FormsRow"]
+custom_minimum_size = Vector2(46, 46)
+layout_mode = 2
+theme_override_styles/panel = SubResource("Style_Slot")
+
+[node name="Glow" type="ColorRect" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox/FormsRow/Slot3"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+color = Color(1, 0.85, 0.25, 0.14)
+
+[node name="Icon" type="TextureRect" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox/FormsRow/Slot3"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -17.0
+offset_top = -17.0
+offset_right = 17.0
+offset_bottom = 17.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ReadyFX" type="TextureRect" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox/FormsRow/Slot3"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -22.0
+offset_top = -22.0
+offset_right = 22.0
+offset_bottom = 22.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5
+modulate = Color(1, 0.82, 0.2, 0.14)
+
+[node name="DeadOverlay" type="ColorRect" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox/FormsRow/Slot3"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.64)
+
+[node name="ChargeBar" type="ProgressBar" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox/FormsRow/Slot3"]
+custom_minimum_size = Vector2(0, 3)
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = -6.0
+offset_right = -4.0
+offset_bottom = -3.0
+show_percentage = false
+theme_override_styles/background = SubResource("Style_SlotChargeBG")
+theme_override_styles/fill = SubResource("Style_SlotChargeFill")
+
+[node name="StatusLabel" type="Label" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox/FormsRow/Slot3"]
+visible = false
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -17.0
+offset_bottom = -3.0
+theme_override_font_sizes/font_size = 9
+text = "KO"
+horizontal_alignment = 1
+
+[node name="Slot4" type="PanelContainer" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox/FormsRow"]
+custom_minimum_size = Vector2(46, 46)
+layout_mode = 2
+theme_override_styles/panel = SubResource("Style_Slot")
+
+[node name="Glow" type="ColorRect" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox/FormsRow/Slot4"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+color = Color(1, 0.85, 0.25, 0.14)
+
+[node name="Icon" type="TextureRect" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox/FormsRow/Slot4"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -17.0
+offset_top = -17.0
+offset_right = 17.0
+offset_bottom = 17.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ReadyFX" type="TextureRect" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox/FormsRow/Slot4"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -22.0
+offset_top = -22.0
+offset_right = 22.0
+offset_bottom = 22.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5
+modulate = Color(1, 0.82, 0.2, 0.14)
+
+[node name="DeadOverlay" type="ColorRect" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox/FormsRow/Slot4"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.64)
+
+[node name="ChargeBar" type="ProgressBar" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox/FormsRow/Slot4"]
+custom_minimum_size = Vector2(0, 3)
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = -6.0
+offset_right = -4.0
+offset_bottom = -3.0
+show_percentage = false
+theme_override_styles/background = SubResource("Style_SlotChargeBG")
+theme_override_styles/fill = SubResource("Style_SlotChargeFill")
+
+[node name="StatusLabel" type="Label" parent="Root/TopLeftElements/ElementsMargin/ElementsVBox/FormsRow/Slot4"]
+visible = false
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -17.0
+offset_bottom = -3.0
+theme_override_font_sizes/font_size = 9
+text = "KO"
+horizontal_alignment = 1
+
+[node name="LevelPanel" type="PanelContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 18.0
+offset_top = -88.0
+offset_right = 250.0
+offset_bottom = -18.0
+grow_vertical = 0
+theme_override_styles/panel = SubResource("Style_Bar")
+
+[node name="LevelVBox" type="VBoxContainer" parent="Root/LevelPanel"]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="LevelTitle" type="Label" parent="Root/LevelPanel/LevelVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "LEVEL"
+
+[node name="LevelNumber" type="Label" parent="Root/LevelPanel/LevelVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 25
+text = "1"
+
+[node name="XPBar" type="ProgressBar" parent="Root/LevelPanel/LevelVBox"]
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+show_percentage = false
+theme_override_styles/background = SubResource("Style_XPBG")
+theme_override_styles/fill = SubResource("Style_XPFill")
+
+[node name="AttributesLabel" type="Label" parent="Root/LevelPanel/LevelVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 9
+text = "(INSERT ATTRIBUTES)"
+
+[node name="BottomBar" type="PanelContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 265.0
+offset_top = -88.0
+offset_right = -315.0
+offset_bottom = -18.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("Style_Bar")
+
+[node name="Content" type="HBoxContainer" parent="Root/BottomBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="PortraitPanel" type="PanelContainer" parent="Root/BottomBar/Content"]
+custom_minimum_size = Vector2(58, 58)
+layout_mode = 2
+theme_override_styles/panel = SubResource("Style_Slot")
+
+[node name="PortraitGlow" type="ColorRect" parent="Root/BottomBar/Content/PortraitPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 3.0
+offset_top = 3.0
+offset_right = -3.0
+offset_bottom = -3.0
+color = Color(0.35, 0.75, 1, 0.12)
+
+[node name="PortraitIcon" type="TextureRect" parent="Root/BottomBar/Content/PortraitPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -22.0
+offset_top = -22.0
+offset_right = 22.0
+offset_bottom = 22.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="InfoVBox" type="VBoxContainer" parent="Root/BottomBar/Content"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 2
+
+[node name="TopInfoRow" type="HBoxContainer" parent="Root/BottomBar/Content/InfoVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="NameLabel" type="Label" parent="Root/BottomBar/Content/InfoVBox/TopInfoRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 17
+text = "WATER"
+
+[node name="HPText" type="Label" parent="Root/BottomBar/Content/InfoVBox/TopInfoRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "100 / 100"
+horizontal_alignment = 2
+
+[node name="HPBar" type="ProgressBar" parent="Root/BottomBar/Content/InfoVBox"]
+custom_minimum_size = Vector2(360, 12)
+layout_mode = 2
+show_percentage = false
+theme_override_styles/background = SubResource("Style_HPBG")
+theme_override_styles/fill = SubResource("Style_HPFill")
+
+[node name="FlavorText" type="Label" parent="Root/BottomBar/Content/InfoVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+modulate = Color(0.84, 0.88, 1, 0.65)
+text = "Flow, recover, and control."
+
+[node name="UltPanel" type="PanelContainer" parent="Root/BottomBar/Content"]
+custom_minimum_size = Vector2(72, 58)
+layout_mode = 2
+theme_override_styles/panel = SubResource("Style_Section")
+
+[node name="UltEffectRoot" type="Control" parent="Root/BottomBar/Content/UltPanel"]
+custom_minimum_size = Vector2(58, 58)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="AuraBack" type="TextureRect" parent="Root/BottomBar/Content/UltPanel/UltEffectRoot"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -25.0
+offset_top = -25.0
+offset_right = 25.0
+offset_bottom = 25.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="AuraFront" type="TextureRect" parent="Root/BottomBar/Content/UltPanel/UltEffectRoot"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -19.0
+offset_top = -19.0
+offset_right = 19.0
+offset_bottom = 19.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="UltIcon" type="TextureRect" parent="Root/BottomBar/Content/UltPanel/UltEffectRoot"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -18.0
+offset_top = -18.0
+offset_right = 18.0
+offset_bottom = 18.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="UltStatus" type="Label" parent="Root/BottomBar/Content/UltPanel/UltEffectRoot"]
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -15.0
+offset_bottom = -2.0
+theme_override_font_sizes/font_size = 9
+text = "8%"
+horizontal_alignment = 1

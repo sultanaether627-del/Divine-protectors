@@ -51,6 +51,13 @@ const TRANSFORM_SOUNDS = {
 	"wind": "res://audio/sfx/player/transform_wind.wav"
 }
 
+const SHOOT_SOUNDS = {
+	"wind": "res://audio/sfx/player/wind_bullet_shoot.mp3",
+	"earth": "res://audio/sfx/player/earth_bullet_shoot.mp3",
+	"fire": "res://audio/sfx/player/fire_bullet_shoot.mp3",
+	"water": "res://audio/sfx/player/water_bullet_shoot.mp3"
+}
+
 const FOOTSTEP_SOUNDS = [
 	"res://audio/sfx/player/footstep_concrete_000.ogg",
 	"res://audio/sfx/player/footstep_concrete_001.ogg",
@@ -156,6 +163,10 @@ func play_ult_ready() -> void:
 func play_transform(form: String) -> void:
 	if TRANSFORM_SOUNDS.has(form):
 		play(TRANSFORM_SOUNDS[form])
+
+func play_shoot(element: String) -> void:
+	if SHOOT_SOUNDS.has(element):
+		play(SHOOT_SOUNDS[element])
 
 func play_footstep() -> void:
 	play_random(FOOTSTEP_SOUNDS, -24.0)  # Quiet footsteps

@@ -1,0 +1,7 @@
+Main menu rebuilt from scratch:
+- Full-screen TextureRect background.
+- Keep Aspect Covered stretch mode.
+- Logo restored on left.
+- Play/Quit rebuilt as TextureButtons on right.
+- Anchors fixed for multiple resolutions.
+- Project stretch set to canvas_items + expand.

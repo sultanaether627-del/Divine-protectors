@@ -6,33 +6,40 @@ var timer_node: Node = null
 func _ready() -> void:
 	await get_tree().process_frame
 	timer_node = get_tree().get_first_node_in_group("boss_timer")
+
 	if timer_node == null:
-		text = "BOSS BATTLE"
+		text = ""
+		visible = false
 		return
+
 	if timer_node.has_signal("boss_timer_changed"):
 		timer_node.boss_timer_changed.connect(_on_boss_timer_changed)
-	if timer_node.has_signal("boss_choice_started"):
-		timer_node.boss_choice_started.connect(_on_boss_choice_updated)
-	if timer_node.has_signal("boss_choice_updated"):
-		timer_node.boss_choice_updated.connect(_on_boss_choice_updated)
+	if timer_node.has_signal("boss_timer_post_zero"):
+		timer_node.boss_timer_post_zero.connect(_on_boss_timer_post_zero)
 	if timer_node.has_signal("boss_battle_started"):
 		timer_node.boss_battle_started.connect(_on_boss_battle_started)
 
 
 func _on_boss_timer_changed(time_left: float) -> void:
-	text = "Boss in %s" % _format_time(time_left)
+	visible = true
+	text = "BOSS IN %s" % _format_time(time_left)
 
 
-func _on_boss_choice_updated(time_left: float, strength_level: int) -> void:
-	text = "Press B: Fight Boss | Power +%d | Next +1 in %s" % [strength_level, _format_time(time_left)]
+func _on_boss_timer_post_zero(secs_until_next_strength: int, strength_level: int) -> void:
+	visible = true
+	if strength_level == 0:
+		text = "BOSS READY  |  Grows stronger in %ds" % secs_until_next_strength
+	else:
+		text = "BOSS READY  |  Lv.+%d  |  Grows in %ds" % [strength_level, secs_until_next_strength]
 
 
 func _on_boss_battle_started() -> void:
-	text = "BOSS BATTLE"
+	visible = false
+	text = ""
 
 
 func _format_time(time_left: float) -> String:
-	var total_seconds: int = int(ceil(time_left))
-	var minutes: int = total_seconds / 60
-	var seconds: int = total_seconds % 60
+	var total_seconds := int(ceil(time_left))
+	var minutes := total_seconds / 60
+	var seconds := total_seconds % 60
 	return "%02d:%02d" % [minutes, seconds]

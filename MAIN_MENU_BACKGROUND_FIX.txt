@@ -1,0 +1,1 @@
+Fixed main menu gray screen by assigning mainmenu bg.png to the background TextureRect and restoring the logo TextureRect.
