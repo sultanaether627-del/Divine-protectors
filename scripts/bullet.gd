@@ -73,11 +73,6 @@ func _physics_process(delta: float) -> void:
 			queue_free()
 			return
 
-		# Do not let bullets hit XP drops/orbs.
-		if collider_node and (collider_node.is_in_group("xp_drop") or collider_node.name.to_lower().find("xp") != -1):
-			global_position = to
-			return
-
 		# Do not let the bullet delete itself because it sees the player/own form.
 		if collider_node and _is_player_related(collider_node):
 			global_position = to
@@ -134,8 +129,6 @@ func _on_body_entered(body: Node) -> void:
 func _on_area_entered(area: Area2D) -> void:
 	if has_hit:
 		return
-	if area and (area.is_in_group("xp_drop") or area.name.to_lower().find("xp") != -1):
-		return
 	if _try_damage_target(area):
 		queue_free()
 
@@ -146,21 +139,16 @@ func _try_damage_target(node: Node) -> bool:
 		return false
 
 	has_hit = true
-	# Use elemental take_damage if available so weaknesses are applied.
-	if target.has_method("take_damage_elemental"):
-		target.take_damage_elemental(damage, bullet_element)
-	else:
-		target.take_damage(damage)
+	target.take_damage(damage)
+	_play_hit_sound()
 	if DEBUG_COMBAT:
-		print("Bullet hit ", target.name, " (element:", bullet_element, ") for ", damage, " damage")
+		print("Bullet hit ", target.name, " for ", damage, " damage")
 	return true
 
 
 func _find_damage_target(node: Node) -> Node:
 	var current: Node = node
 	while current != null:
-		if current.is_in_group("boss_reflect_projectile") and current.has_method("take_damage"):
-			return current
 		if (current.is_in_group("enemy") or current.is_in_group("boss")) and current.has_method("take_damage"):
 			return current
 		current = current.get_parent()
@@ -174,3 +162,9 @@ func _is_player_related(node: Node) -> bool:
 			return true
 		current = current.get_parent()
 	return false
+
+
+func _play_hit_sound() -> void:
+	var sfx_manager = get_node_or_null("/root/SFXManager")
+	if sfx_manager and sfx_manager.has_method("play_hit"):
+		sfx_manager.play_hit()

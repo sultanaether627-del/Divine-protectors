@@ -17,8 +17,7 @@ shape = SubResource("shape")
 [node name="FormsRoot" type="Node2D" parent="."]
 
 [node name="Camera2D" type="Camera2D" parent="."]
-scale = Vector2(1.01773, 0.992481)
-zoom = Vector2(1.5, 1.5)
+zoom = Vector2(2.5, 2.5)
 position_smoothing_speed = 8.0
 
 [node name="AimIndicator" parent="." instance=ExtResource("6_indicator")]

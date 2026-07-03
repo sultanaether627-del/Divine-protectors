@@ -1,13 +1,14 @@
-[gd_scene load_steps=3 format=3 uid="uid://dyervowkxvgs"]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/ult_area.gd" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://udwx2uwtkhw7" path="res://sprites/water ult.png" id="2_bxkte"]
+[ext_resource type="Texture2D" path="res://sprites/water_ult.png" id="2_tex"]
 
 [node name="WaterUlt" type="Node2D"]
 script = ExtResource("1_script")
 ult_type = "water"
+radius = 150.0
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture_filter = 1
 scale = Vector2(2.35, 2.35)
-texture = ExtResource("2_bxkte")
+texture = ExtResource("2_tex")

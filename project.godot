@@ -19,7 +19,6 @@ config/icon="res://icon.svg"
 
 SFXManager="*res://scripts/sfx_manager.gd"
 MusicManager="*res://scripts/music_manager.gd"
-DifficultyManager="*res://scripts/difficulty_manager.gd"
 
 [input]
 

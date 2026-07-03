@@ -74,7 +74,6 @@ func _start_attack() -> void:
 
 	impact_active = true
 	queue_redraw()
-	_screen_shake(10.0, 0.18)
 
 	if sprite.sprite_frames and sprite.sprite_frames.has_animation("smash"):
 		sprite.play("smash")
@@ -100,16 +99,6 @@ func _check_hit() -> void:
 		if body and body.is_in_group("player") and body.has_method("take_damage"):
 			has_hit = true
 			body.take_damage(damage)
-			_screen_shake(18.0, 0.24)
 			if DEBUG_BOSS:
 				print("Boss fist hit ", body.name, " for ", damage)
 			return
-
-func _screen_shake(strength: float, duration: float) -> void:
-	var shaker: Node = get_tree().get_first_node_in_group("screen_shake")
-	if shaker and shaker.has_method("shake"):
-		shaker.shake(strength, duration)
-
-	var player_node: Node = get_tree().get_first_node_in_group("player")
-	if player_node and player_node.has_method("_shake_camera"):
-		player_node._shake_camera(strength * 0.25, duration)

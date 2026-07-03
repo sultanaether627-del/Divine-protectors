@@ -5,9 +5,9 @@ extends CanvasLayer
 var player: Node = null
 var slots: Array = []
 var icon_textures := {
-	"water": preload("res://sprites/icons/earth_icon.png"),
-	"fire": preload("res://sprites/icons/water_icon.png"),
-	"earth": preload("res://sprites/icons/fire_icon.png"),
+	"water": preload("res://sprites/icons/water_icon.png"),
+	"fire": preload("res://sprites/icons/fire_icon.png"),
+	"earth": preload("res://sprites/icons/earth_icon.png"),
 	"wind": preload("res://sprites/icons/wind_icon.png")
 }
 var ult_ready_textures := {

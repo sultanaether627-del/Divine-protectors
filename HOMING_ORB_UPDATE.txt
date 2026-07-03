@@ -1,1 +1,0 @@
-Parry orb now homes toward the player before being reflected.

@@ -13,15 +13,9 @@ extends Area2D
 var player: Node2D
 var current_speed := 0.0
 var collected := false
-var burst_velocity: Vector2 = Vector2.ZERO
-var burst_damping: float = 8.0
 
 
 func _ready() -> void:
-	add_to_group("xp_drop")
-	collision_layer = 0
-	collision_mask = 1
-	monitorable = false
 	body_entered.connect(_on_body_entered)
 
 	await get_tree().process_frame
@@ -77,17 +71,10 @@ func collect() -> void:
 		await tween.finished
 
 	if player:
-		# Scale XP by the difficulty exp multiplier.
-		var scaled_xp: int = maxi(1, int(round(float(xp_amount) * DifficultyManager.get_exp_multiplier())))
 		if player.has_method("collect_xp_orb"):
-			player.collect_xp_orb(scaled_xp)
+			player.collect_xp_orb(xp_amount)
 
 		elif player.has_method("add_xp"):
-			player.add_xp(scaled_xp)
+			player.add_xp(xp_amount)
 
 	queue_free()
-
-
-
-func set_initial_burst(velocity_value: Vector2) -> void:
-	burst_velocity = velocity_value

@@ -1,12 +1,12 @@
 extends Node2D
 
-# Boss arena visual script.
-# Prefers the new 64x64 tilesheet for a sharper look.
-# Tiles are rendered at 32x32 world pixels so the arena fits 1280x720.
+# Final stable boss arena script.
+# This does NOT use TileSetAtlasSource, because that caused the grey void / tile errors.
+# It draws the arena with Sprite2D tiles directly from the existing tilesheet.
 
-const TILE_SIZE: int = 32
-const MAP_WIDTH: int = 40
-const MAP_HEIGHT: int = 23
+const TILE_SIZE: int = 16
+const MAP_WIDTH: int = 80
+const MAP_HEIGHT: int = 45
 
 const STONE_TILES: Array[Vector2i] = [
 	Vector2i(3, 7), Vector2i(4, 7), Vector2i(5, 7),
@@ -40,32 +40,20 @@ const RUBBLE_TILE: Vector2i = Vector2i(14, 12)
 
 var arena_visuals: Node2D
 var tile_texture: Texture2D = null
-var tile_pixel_size: int = 64
-var tile_scale: float = 0.5
+var tile_pixel_size: int = 16
+var tile_scale: float = 1.0
 
 
 func _ready() -> void:
-	get_tree().set_meta("force_boss_music", true)
 	_build_arena_visuals()
-	# Ensure the game is never paused when entering the boss arena.
-	# A pending level-up upgrade choice or pause state from the world scene
-	# can carry over through change_scene_to_packed and freeze the player.
-	get_tree().paused = false
 	await get_tree().process_frame
 	_connect_boss_flow()
-	# Reset upgrade_pending on the player in case a level-up was in progress
-	# when the scene transition happened — without this the player can't move.
-	var player := get_tree().get_first_node_in_group("player")
-	if player and player.get("upgrade_pending") != null:
-		player.upgrade_pending = false
 
 
 func _find_tiles_texture() -> Texture2D:
-	# Prefer the new 64x64 tilesheet first for the sharpest look.
 	var paths: Array[String] = [
-		"res://scripts/64x64 new (1).png",
-		"res://tiles 64x64.png",
 		"res://tiles.png",
+		"res://tiles 64x64.png",
 		"res://scripts/tiles.png"
 	]
 
@@ -75,7 +63,7 @@ func _find_tiles_texture() -> Texture2D:
 			if tex:
 				return tex
 
-	push_error("BossArena: Could not find tiles texture.")
+	push_error("BossArena: Could not find tiles texture. Expected tiles.png or tiles 64x64.png.")
 	return null
 
 
@@ -90,13 +78,12 @@ func _build_arena_visuals() -> void:
 	if tile_texture == null:
 		return
 
-	# Detect tile pixel size from texture width.
-	# The new 64x64 sheet is wide; the old 16px sheet is narrow.
-	if tile_texture.get_width() >= 512:
+	# The project has used both 16px and 64px tilesheets.
+	# Draw them all at 16x16 world size so the arena always fits 1280x720.
+	if tile_texture.get_width() >= 1024:
 		tile_pixel_size = 64
 	else:
 		tile_pixel_size = 16
-	# Scale so every tile occupies TILE_SIZE x TILE_SIZE world pixels.
 	tile_scale = float(TILE_SIZE) / float(tile_pixel_size)
 
 	for y in range(MAP_HEIGHT):
@@ -150,57 +137,57 @@ func _pick_ground_tile(x: int, y: int) -> Vector2i:
 
 
 func _build_paths() -> void:
-	# Main path from player spawn (bottom-centre) to boss (top-centre).
-	for y in range(4, MAP_HEIGHT - 3):
-		for x in range(18, 22):
+	# Main path from player to boss.
+	for y in range(8, MAP_HEIGHT - 6):
+		for x in range(36, 44):
 			_add_tile(x, y, BROWN_TILES[(x + y) % BROWN_TILES.size()], 1)
 
-	# Side lanes — horizontal corridors.
-	for x in range(6, MAP_WIDTH - 6):
-		for y in [6, 7, 15, 16]:
+	# Side lanes.
+	for x in range(13, MAP_WIDTH - 13):
+		for y in [13, 14, 30, 31]:
 			_add_tile(x, y, BROWN_TILES[(x + y) % BROWN_TILES.size()], 1)
 
-	# Player staging area (bottom section).
-	for y in range(17, 21):
-		for x in range(14, 26):
+	# Player staging area.
+	for y in range(34, 40):
+		for x in range(28, 52):
 			_add_tile(x, y, BROWN_TILES[(x + y) % BROWN_TILES.size()], 1)
 
 
 func _build_pedestal() -> void:
-	# Boss platform — raised area at top-centre.
-	for y in range(2, 7):
-		for x in range(15, 25):
+	# Boss platform, made only from existing tile pieces.
+	for y in range(5, 12):
+		for x in range(32, 48):
 			_add_tile(x, y, BROWN_TILES[(x + y) % BROWN_TILES.size()], 2)
 
-	for y in range(3, 6):
-		for x in range(17, 23):
+	for y in range(7, 10):
+		for x in range(37, 43):
 			_add_tile(x, y, STONE_TILES[(x + y) % STONE_TILES.size()], 3)
 
-	_add_tile(19, 3, ALTAR_TOP_LEFT, 4)
-	_add_tile(20, 3, ALTAR_TOP_RIGHT, 4)
-	_add_tile(19, 4, ALTAR_BOTTOM_LEFT, 4)
-	_add_tile(20, 4, ALTAR_BOTTOM_RIGHT, 4)
+	_add_tile(39, 7, ALTAR_TOP_LEFT, 4)
+	_add_tile(40, 7, ALTAR_TOP_RIGHT, 4)
+	_add_tile(39, 8, ALTAR_BOTTOM_LEFT, 4)
+	_add_tile(40, 8, ALTAR_BOTTOM_RIGHT, 4)
 
-	for x in range(16, 24):
+	for x in range(35, 45):
 		if x % 3 == 0:
-			_add_tile(x, 6, RUBBLE_TILE, 4)
+			_add_tile(x, 10, RUBBLE_TILE, 4)
 		else:
-			_add_tile(x, 6, PILLAR_BASE, 4)
+			_add_tile(x, 10, PILLAR_BASE, 4)
 
 
 func _build_center_altar() -> void:
-	_add_tile(19, 11, ALTAR_TOP_LEFT, 4)
-	_add_tile(20, 11, ALTAR_TOP_RIGHT, 4)
-	_add_tile(19, 12, ALTAR_BOTTOM_LEFT, 4)
-	_add_tile(20, 12, ALTAR_BOTTOM_RIGHT, 4)
+	_add_tile(39, 22, ALTAR_TOP_LEFT, 4)
+	_add_tile(40, 22, ALTAR_TOP_RIGHT, 4)
+	_add_tile(39, 23, ALTAR_BOTTOM_LEFT, 4)
+	_add_tile(40, 23, ALTAR_BOTTOM_RIGHT, 4)
 
 
 func _build_pillars() -> void:
 	var pillar_columns: Array[Vector2i] = [
-		Vector2i(7, 5),  Vector2i(32, 5),
-		Vector2i(7, 14), Vector2i(32, 14),
-		Vector2i(12, 10), Vector2i(27, 10),
-		Vector2i(12, 13), Vector2i(27, 13)
+		Vector2i(15, 10), Vector2i(64, 10),
+		Vector2i(15, 29), Vector2i(64, 29),
+		Vector2i(24, 20), Vector2i(55, 20),
+		Vector2i(24, 25), Vector2i(55, 25)
 	]
 
 	for pillar_pos in pillar_columns:
@@ -211,10 +198,10 @@ func _build_pillars() -> void:
 
 func _scatter_rubble() -> void:
 	var rubble_positions: Array[Vector2i] = [
-		Vector2i(4, 3), Vector2i(7, 2), Vector2i(32, 2), Vector2i(35, 3),
-		Vector2i(3, 6), Vector2i(36, 6), Vector2i(3, 17), Vector2i(36, 17),
-		Vector2i(5, 20), Vector2i(34, 20), Vector2i(10, 3), Vector2i(29, 3),
-		Vector2i(11, 18), Vector2i(28, 18), Vector2i(17, 1), Vector2i(22, 1)
+		Vector2i(9, 6), Vector2i(14, 5), Vector2i(65, 5), Vector2i(70, 6),
+		Vector2i(6, 12), Vector2i(73, 12), Vector2i(7, 34), Vector2i(72, 34),
+		Vector2i(10, 39), Vector2i(68, 39), Vector2i(20, 7), Vector2i(59, 7),
+		Vector2i(23, 36), Vector2i(56, 36), Vector2i(35, 4), Vector2i(44, 4)
 	]
 
 	for rubble_pos in rubble_positions:

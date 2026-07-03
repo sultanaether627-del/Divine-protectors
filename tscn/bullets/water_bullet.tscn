@@ -32,7 +32,6 @@ radius = 8.0
 collision_layer = 4
 collision_mask = 3
 script = ExtResource("1_script")
-bullet_element = "water"
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 texture_filter = 1

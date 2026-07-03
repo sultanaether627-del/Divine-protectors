@@ -14,11 +14,9 @@ var effect_applied := false
 
 
 func _ready() -> void:
-	z_index = -2
-	z_as_relative = false
+	z_index = -50
 	if sprite:
-		sprite.z_index = -2
-		sprite.z_as_relative = false
+		sprite.z_index = -50
 
 	player = get_tree().get_first_node_in_group("player")
 

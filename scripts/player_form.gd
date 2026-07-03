@@ -11,7 +11,6 @@ extends Node2D
 
 
 func _ready() -> void:
-	_spawn_in_polish()
 	if shot_origin:
 		shot_origin.position = shot_origin_offset
 	if sprite and sprite.sprite_frames and sprite.sprite_frames.has_animation("idle"):
@@ -53,13 +52,3 @@ func get_shot_position() -> Vector2:
 		return shot_origin.global_position
 
 	return global_position
-
-
-
-func _spawn_in_polish() -> void:
-	scale = Vector2(0.82, 0.82)
-	modulate.a = 0.0
-	var tween := create_tween()
-	tween.set_parallel(true)
-	tween.tween_property(self, "scale", Vector2(1, 1), 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tween.tween_property(self, "modulate:a", 1.0, 0.16)
